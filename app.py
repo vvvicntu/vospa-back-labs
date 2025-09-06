@@ -37,11 +37,17 @@ def author():
 @app.route("/image")
 def image():
     path = url_for("static", filename="ledy bag.png")
+    css_path = url_for("static", filename="lab1.css")
+    
     return '''
 <!doctype html>
 <html>
+    <head>
+        <link rel="stylesheet" href="''' + css_path + '''">
+    </head>
     <body>
-        <h1>Леди Баг</h1>
+        <h1>Леди Баг в шоке от back-end</h1>
+        <p>(и я тоже)</p>
         <img src="''' + path + '''">
     </body>
 </html>
@@ -60,7 +66,7 @@ def counter():
 <!doctype html>
 <html>
     <body>
-        Сколько раз вы сюда заходили: ''' + str(count) + '''
+        Сколько раз я открыл : ''' + str(count) + '''
         <hr>
         Дата и время: ''' + str(time) + '''<br>
         Запрошенный адрес: ''' + url + '''<br>
@@ -83,4 +89,3 @@ def created():
     <body>
 </html>
 ''', 201
-
