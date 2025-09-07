@@ -6,6 +6,63 @@ app = Flask(__name__)
 def not_found(err):
     return "Нет такой страницы :(", 404
 
+@app.route("/")
+@app.route("/index")
+def index():
+    return '''
+<!doctype html>
+<html>
+    <head>
+        <title>НГТУ, ФБ, Лабораторные работы</title>
+        <style>
+            body {
+                padding: 20px;
+                background-color: #fed8ee;
+            }
+            .off {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px black;
+            }
+            header {
+                background: #c3418d;;
+                color: white;
+                padding: 20px;
+                text-align: center;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            }
+            footer {
+                background: #c3418d;;
+                color: white;
+                padding: 15px;
+                text-align: center;
+                border-radius: 5px;
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="off">
+            <header>
+                <h1>НГТУ, ФБ, WEB-программирование, часть 2. Список лабораторных</h1>
+            </header>
+            
+            <nav>
+                <a href="/lab1">Лабораторная работа №1</a>
+            </nav>
+            
+            <footer>
+                Воспанчук Виктория Владимировна, ФБИ-31, 3 курс, 2023
+            </footer>
+        </div>
+    </body>
+</html>
+'''
+
 @app.route("/lab1/web")
 def web():
     return """<!doctype html>
@@ -20,7 +77,7 @@ def web():
 
 @app.route("/lab1/author")
 def author():
-    name = 'Воспанчук Виктория Влдаимировна'
+    name = 'Воспанчук Виктория Владимировна'
     group = 'ФБИ-31'
     faculty = 'ФБ'
 
@@ -31,6 +88,8 @@ def author():
             <p>Группа: """ + group + """ </p>
             <p>Факультет: """ + faculty + """ </p>
             <a href="/lab1/web">web</a>
+            <br>
+            <a href="/">На главную</a>
         </body>
     </html>"""
 
@@ -49,6 +108,8 @@ def image():
         <h1>Леди Баг в шоке от back-end</h1>
         <p>(и я тоже)</p>
         <img src="''' + path + '''">
+        <br>
+        <a href="/">На главную</a>
     </body>
 </html>
 '''
@@ -78,7 +139,8 @@ def counter():
         Ваш IP-адрес: ''' + client_ip + '''<br>
         <a href="/lab1/clear_counter">Очистить счетчик</a><br><br>
         <img src="''' + cold + '''">
-        
+        <br>
+        <a href="/">На главную</a>
     </body>
 </html>
 '''
@@ -98,6 +160,7 @@ def clear_counter():
         <h1>Холодильник закрыт :(</h1>
         <p>Текущее значение счетчика: 0</p>
         <a href="/lab1/counter">Перейти к счетчику</a><br>
+        <a href="/">На главную</a>
     </body>
 </html>
 '''
@@ -114,6 +177,64 @@ def created():
     <body>
         <h1>Создано успешно</h1>
         <div><i>что-то создано...</i></div>
+        <a href="/">На главную</a>
     <body>
 </html>
 ''', 201
+
+@app.route("/lab1")
+def lab1_index():
+    return '''
+<!doctype html>
+<html>
+    <head>
+        <title>Лабораторная работа №1</title>
+        <style>
+            body {
+                margin: 20px;
+                background-color: #fed8ee;
+            }
+            .off {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+            h1 {
+                color: #2c3e50;
+                text-align: center;
+            }
+            .menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin: 20px 0;
+            }
+            .menu a {
+                display: block;
+                padding: 15px;
+                background: #c3418d;
+                color: white;
+                border-radius: 5px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="off">
+            <h1>Лабораторная работа №1</h1>
+            <div class="menu">
+                <a href="/lab1/web">Web-сервер</a>
+                <a href="/lab1/author">Автор</a>
+                <a href="/lab1/image">Изображение</a>
+                <a href="/lab1/counter">Сколько раз я открыл холодильник</a>
+                <a href="/lab1/info">Информация</a>
+                <a href="/lab1/created">Создание</a>
+            </div>
+            <a href="/">← На главную</a>
+        </div>
+    </body>
+</html>
+'''
