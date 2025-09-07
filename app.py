@@ -6,19 +6,19 @@ app = Flask(__name__)
 def not_found(err):
     return "Нет такой страницы :(", 404
 
-@app.route("/web")
+@app.route("/lab1/web")
 def web():
     return """<!doctype html>
         <html>
            <body>
                <h1>web-сервер на flask</h1>
-               <a href="/author">author</a>
+               <a href="/lab1/author">author</a>
            <body> 
         </html>""", 200, {"X-Server": "sample",
                           'Content-Type': 'text/plain; charset=utf-8'
                           }
 
-@app.route("/author")
+@app.route("/lab1/author")
 def author():
     name = 'Воспанчук Виктория Влдаимировна'
     group = 'ФБИ-31'
@@ -30,11 +30,11 @@ def author():
             <p>Студент: """ + name + """ </p>
             <p>Группа: """ + group + """ </p>
             <p>Факультет: """ + faculty + """ </p>
-            <a href="/web">web</a>
+            <a href="/lab1/web">web</a>
         </body>
     </html>"""
 
-@app.route("/image")
+@app.route("/lab1/image")
 def image():
     path = url_for("static", filename="ledy bag.png")
     css_path = url_for("static", filename="lab1.css")
@@ -55,7 +55,7 @@ def image():
 
 count = 0 
 
-@app.route("/counter")
+@app.route("/lab1/counter")
 def counter():
     cold = url_for("static", filename="холодильник.jpg")
     css_path = url_for("static", filename="lab1.css")
@@ -76,14 +76,14 @@ def counter():
         Дата и время: ''' + str(time) + '''<br>
         Запрошенный адрес: ''' + url + '''<br>
         Ваш IP-адрес: ''' + client_ip + '''<br>
-        <a href="/clear_counter">Очистить счетчик</a><br><br>
+        <a href="/lab1/clear_counter">Очистить счетчик</a><br><br>
         <img src="''' + cold + '''">
         
     </body>
 </html>
 '''
 
-@app.route("/clear_counter")
+@app.route("/lab1/clear_counter")
 def clear_counter():
     css_path = url_for("static", filename="lab1.css")
     global count
@@ -97,14 +97,14 @@ def clear_counter():
     <body>
         <h1>Холодильник закрыт :(</h1>
         <p>Текущее значение счетчика: 0</p>
-        <a href="/counter">Перейти к счетчику</a><br>
+        <a href="/lab1/counter">Перейти к счетчику</a><br>
     </body>
 </html>
 '''
 
-@app.route("/info")
+@app.route("/lab1/info")
 def info():
-    return redirect("/author")
+    return redirect("/lab1/author")
 
 @app.route("/lab1/created")
 def created():
