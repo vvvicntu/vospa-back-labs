@@ -57,6 +57,8 @@ count = 0
 
 @app.route("/counter")
 def counter():
+    cold = url_for("static", filename="холодильник.jpg")
+    css_path = url_for("static", filename="lab1.css")
     global count
     count += 1
     time = datetime.today()
@@ -65,15 +67,41 @@ def counter():
     return '''
 <!doctype html>
 <html>
+    <head>
+        <link rel="stylesheet" href="''' + css_path + '''">
+    </head>
     <body>
-        Сколько раз я открыл : ''' + str(count) + '''
+        <h1>Сколько раз я открыл холодильник: ''' + str(count) + '''</h1>
         <hr>
         Дата и время: ''' + str(time) + '''<br>
         Запрошенный адрес: ''' + url + '''<br>
         Ваш IP-адрес: ''' + client_ip + '''<br>
+        <a href="/clear_counter">Очистить счетчик</a><br><br>
+        <img src="''' + cold + '''">
+        
     </body>
 </html>
 '''
+
+@app.route("/clear_counter")
+def clear_counter():
+    css_path = url_for("static", filename="lab1.css")
+    global count
+    count = 0
+    return '''
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="''' + css_path + '''">
+    </head>
+    <body>
+        <h1>Холодильник закрыт :(</h1>
+        <p>Текущее значение счетчика: 0</p>
+        <a href="/counter">Перейти к счетчику</a><br>
+    </body>
+</html>
+'''
+
 @app.route("/info")
 def info():
     return redirect("/author")
