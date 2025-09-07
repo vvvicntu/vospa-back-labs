@@ -220,6 +220,10 @@ def lab1_index():
                 border-radius: 5px;
                 text-align: center;
             }
+            .content{
+                color: #2c3e50;
+                text-align: center;
+            }
         </style>
     </head>
     <body>
@@ -233,6 +237,15 @@ def lab1_index():
                 <a href="/lab1/info">Информация</a>
                 <a href="/lab1/created">Создание</a>
             </div>
+            <div class="content">
+                Flask — фреймворк для создания веб-приложений на языке
+                программирования Python, использующий набор инструментов
+                Werkzeug, а также шаблонизатор Jinja2. Относится к категории так
+                называемых микрофреймворков — минималистичных каркасов
+                веб-приложений, сознательно предоставляющих лишь самые ба
+                зовые возможности.
+            </div><br>
+
             <a href="/">← На главную</a>
         </div>
     </body>
