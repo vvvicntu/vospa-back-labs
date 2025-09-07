@@ -251,3 +251,136 @@ def lab1_index():
     </body>
 </html>
 '''
+
+@app.route("/lab1/error400")
+def error400():
+    style = url_for("static", filename="lab1.css")
+    return '''
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <link rel="stylesheet" href="''' + style + '''">
+        <title>Bad Request</title>
+    </head>
+    <body>
+        <h1>
+            Bad Request <br> 
+            400
+        </h1>
+        <div>
+            Ошибка 400 означает некорректный запрос
+        </div>
+    </body>
+</html>
+''', 400
+
+
+@app.route("/lab1/error401")
+def error401():
+    style = url_for("static", filename="lab1.css")
+    return '''
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <link rel="stylesheet" href="''' + style + '''">
+        <title>Unauthorized</title>
+    </head>
+    <body>
+        <h1>
+            Unauthorized<br>
+            401   
+        </h1>
+        <div>
+            Ошибка 401 возникает, когда вы не имеете разрешения на доступ к запрашиваемому ресурсу
+        </div>
+    </body>
+</html>
+''', 401
+
+@app.route("/lab1/error402")
+def error402():
+    style = url_for("static", filename="lab1.css")
+    return '''
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <link rel="stylesheet" href="''' + style + '''">
+        <title>Payment Required</title>
+    </head>
+    <body>
+        <h1>
+            Payment Required <br>
+            402
+        </h1>
+        <div>
+            Требуется оплата
+        </div>
+    </body>
+</html>
+''', 402
+
+@app.route("/lab1/error403")
+def error403():
+    style = url_for("static", filename="lab1.css")
+    return '''
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <link rel="stylesheet" href="''' + style + '''">
+        <title>Forbidden</title>
+    </head>
+    <body>
+        <h1>
+            Forbidden <br>
+            403
+        </h1>
+        <div>
+            Доступ к запрошенному ресурсу запрещён
+        </div>
+    </body>
+</html>
+''', 403
+
+@app.route("/lab1/error405")
+def error405():
+    style = url_for("static", filename="lab1.css")
+    return '''
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <link rel="stylesheet" href="''' + style + '''">
+        <title>Method Not Allowed</title>
+    </head>
+    <body>
+        <h1>
+            Method Not Allowed <br>
+            405
+        </h1>
+        <div>
+            Возникает, когда сервер распознает метод запроса, но не разрешает его для указанного ресурса.
+        </div>
+    </body>
+</html>
+''', 405
+
+@app.route("/lab1/error418")
+def error418():
+    style = url_for("static", filename="lab1.css")
+    return '''
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <link rel="stylesheet" href="''' + style + '''">
+        <title>I'm a teapot</title>
+    </head>
+    <body>
+        <h1>
+            I'm a teapot <br>
+            418
+        </h1>
+        <div>
+            Я чайник
+        </div>
+    </body>
+</html>
+''', 418
