@@ -230,6 +230,11 @@ def lab1_index():
                 color: #2c3e50;
                 text-align: center;
             }
+            h2 {
+                color: #2c3e50;
+                text-align: center;
+                margin-top: 30px;
+            }
             .menu {
                 display: flex;
                 flex-wrap: wrap;
@@ -243,7 +248,22 @@ def lab1_index():
                 color: white;
                 border-radius: 5px;
                 text-align: center;
+                text-decoration: none;
             }
+            
+            .routes-list {
+                margin: 20px 0;
+            }
+            .routes-list a {
+                display: block;
+                padding: 10px;
+                margin: 5px 0;
+                background: #f8f9fa;
+                border-left: 4px solid #c3418d;
+                text-decoration: none;
+                color: #2c3e50;
+            }
+        
             .content{
                 color: #2c3e50;
                 text-align: center;
@@ -264,13 +284,33 @@ def lab1_index():
             <div class="content">
                 Flask — фреймворк для создания веб-приложений на языке
                 программирования Python, использующий набор инструментов
-                Werkzeug, а также шаблонизатор Jinja2. Относится к категории так
+                Werkzeug, а также шаблонизатор Jinja2. Отrelativeтся к категории так
                 называемых микрофреймворков — минималистичных каркасов
                 веб-приложений, сознательно предоставляющих лишь самые ба
                 зовые возможности.
             </div><br>
 
             <a href="/">← На главную</a>
+
+            <h2>Список роутов</h2>
+            <div class="routes-list">
+                <a href="/index">Главная страница</a>
+                <a href="/lab1">Лабораторная работа 1</a>
+                <a href="/lab1/web">Web-сервер</a>
+                <a href="/lab1/author">Информация об авторе</a>
+                <a href="/lab1/image">Изображение</a>
+                <a href="/lab1/counter">Сколько раз я открыл холодильник</a>
+                <a href="/lab1/clear_counter">Очистка счетчика</a>
+                <a href="/lab1/info">Информация (редирект)</a>
+                <a href="/lab1/created">Создание (статус 201)</a>
+                <a href="/lab1/error400">Ошибка 400 - Bad Request</a>
+                <a href="/lab1/error401">Ошибка 401 - Unauthorized</a>
+                <a href="/lab1/error402">Ошибка 402 - Payment Required</a>
+                <a href="/lab1/error403">Ошибка 403 - Forbidden</a>
+                <a href="/lab1/error405">Ошибка 405 - Method Not Allowed</a>
+                <a href="/lab1/error418">Ошибка 418 - I'm a teapot</a>
+                <a href="/lab1/error500">Ошибка 500 - Internal Server Error</a>
+            </div>
         </div>
     </body>
 </html>
