@@ -133,7 +133,11 @@ def image():
         <a href="/">На главную</a>
     </body>
 </html>
-'''
+''', 200, {"Content-Language": "ru-RU",
+           "X-Custom-Header": "MyCustomValue",
+           "X-Application-Version": "1.0.0",
+           "Content-Type": "text/html; charset=utf-8"
+          }
 
 count = 0 
 
@@ -198,7 +202,6 @@ def created():
     <body>
         <h1>Создано успешно</h1>
         <div><i>что-то создано...</i></div>
-        <a href="/">На главную</a>
     <body>
 </html>
 ''', 201
