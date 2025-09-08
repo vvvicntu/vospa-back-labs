@@ -405,3 +405,26 @@ def error418():
     </body>
 </html>
 ''', 418
+
+@app.route("/lab1/error500")
+def cause_error_500():
+    result = 10 / 0
+    return "Эта строка никогда не будет показана"
+
+@app.errorhandler(500)
+def internal_server_error(err):
+    style = url_for("static", filename="lab1.css")
+    return '''
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="''' + style + '''">
+        <title>500 - Ошибка сервера</title>
+    </head>
+    <body>
+        <h1>500 - Внутренняя ошибка сервера</h1>
+            <a href="/">На главную</a> 
+        </div>
+    </body>
+</html>
+''', 500
