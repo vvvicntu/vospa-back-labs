@@ -1,11 +1,23 @@
 from flask import Flask, url_for, request, redirect
 from datetime import datetime
 app = Flask(__name__) 
+access_log = []
 
 @app.errorhandler(404)
 def not_found(err):
     path = url_for("static", filename="cat.jpg")
     css_path = url_for("static", filename="lab1.css")
+    user_ip = request.remote_addr
+    access_time = str(datetime.now())
+    request_url = request.url
+
+    access_log.append(f"[{access_time}] пользователь {user_ip} зашёл на адрес: {request_url}")
+
+    log_html = "<ul>"
+    for entry in reversed(access_log):
+        log_html += f"<li>{entry}</li>"
+    log_html += "</ul>"
+
     return '''
 <!doctype html>
 <html>
@@ -16,19 +28,33 @@ def not_found(err):
                 padding: 20px;
                 background-color: #fed8ee;
             }
+            img {
+                margin-top: 20px;
+                max-width: 50%;
+                height: auto;
+                border-radius: 10px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            }
         </style>
     </head>
     <body>
         <h1>Ошибка 404 :(</h1>
-        <img src="''' + path + '''"><br><br>
+        <img src="''' + path + '''" alt="Грустный кот" style="max-width: 300px;"><br><br>
         <div>
-            Супер кот в депрессии, потому что такой страницы не существует
+            <h3>Супер кот в депрессии, потому что такой страницы не существует</h3>
+            Ваш IP: ''' + str(user_ip) + '''<br> 
+            Дата доступа: ''' + access_time + '''<br>
+            <a href="/lab1/index"> На главную </a>
+        </div>
+        <div>
+            <h2>Журнал посещений</h2>
+            ''' + log_html + '''
         </div>
     </body> 
 </html>''', 404
 
 @app.route("/")
-@app.route("/index")
+@app.route("/lab1/index")
 def index():
     return '''
 <!doctype html>
