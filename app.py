@@ -509,13 +509,27 @@ def a1():
 def a2():
     return 'со слешем'
 
-flower_list = ('роза', 'героин', 'ромашка', 'геноцид')
+flower_list = ['Bud', 'Essa', 'Старый мельник', 'Krone']
 @app.route('/lab2/flowers/<int:flower_id>')
 def flowers(flower_id):
     if flower_id >= len(flower_list):
         abort(404)
     else: 
-        return "цветок: " + flower_list[flower_id]
+        return "пиво к пивному букетику: " + flower_list[flower_id]
 
+@app.route('/lab2/add_flower/<name>')
+def add_flower(name):
+    flower_list.append(name)
+    return  f'''
+<!doctype html>
+<html>
+    <body>
+    <h1>Добавлено новое пиво!</h1>
+    <p>Марка нового пива: {name}</p>
+    <p>Всего бутылок: {len(flower_list)} </p>
+    <p>Полный список: {flower_list}</p>
+    </body>
+</html>
+'''
 
 
