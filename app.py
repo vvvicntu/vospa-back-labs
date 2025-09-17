@@ -1,20 +1,21 @@
 from flask import Flask, url_for, request, redirect
 from datetime import datetime
 app = Flask(__name__) 
-access_log = []
+access_log = [] #история посещений сайта
 
-@app.errorhandler(404)
+@app.errorhandler(404) #обработчик ошибки 404
 def not_found(err):
     path = url_for("static", filename="cat.jpg")
     css_path = url_for("static", filename="lab1.css")
-    user_ip = request.remote_addr
+    user_ip = request.remote_addr # IP-адрес пользователя
     access_time = str(datetime.now())
     request_url = request.url
 
+    #добавляет запись в журнал в указанном порядке
     access_log.append(f"[{access_time}] пользователь {user_ip} зашёл на адрес: {request_url}")
 
     log_html = "<ul>"
-    for entry in reversed(access_log):
+    for entry in reversed(access_log): 
         log_html += f"<li>{entry}</li>"
     log_html += "</ul>"
 
@@ -119,7 +120,7 @@ def web():
                <a href="/lab1/author">author</a>
            <body> 
         </html>""", 200, {"X-Server": "sample",
-                          'Content-Type': 'text/plain; charset=utf-8'
+                          'Content-Type': 'text/csv; charset=utf-8'
                           }
 
 @app.route("/lab1/author")
