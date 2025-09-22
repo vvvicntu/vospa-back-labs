@@ -538,5 +538,13 @@ def example():
     group = 'ФБИ-31'
     course = '3 курс'
     lab_num = '2'
-    return render_template('example.html', name=name, group=group, course=course, lab_num=lab_num)
+    kvami = [
+        {'name': 'плаг', 'talisman': 'кот'}, 
+        {'name': 'нууру', 'talisman': 'бабочка'},
+        {'name': 'тикки', 'talisman': 'божья коровка'}, 
+        {'name': 'сасс', 'talisman': 'змея'},
+        {'name': 'триккс', 'talisman': 'лиса'}
+    ]
+    return render_template('example.html', name=name, group=group, course=course, 
+                           lab_num=lab_num, kvami=kvami)
 
