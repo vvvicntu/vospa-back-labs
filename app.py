@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request, redirect, abort
+from flask import Flask, url_for, request, redirect, abort, render_template
 from datetime import datetime
 app = Flask(__name__) 
 access_log = [] #история посещений сайта
@@ -532,4 +532,7 @@ def add_flower(name):
 </html>
 '''
 
+@app.route('/lab2/example')
+def example():
+    return render_template('example.html')
 
