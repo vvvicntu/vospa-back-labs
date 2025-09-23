@@ -695,3 +695,29 @@ def books():
         {'author': 'Джонатан С. Фоер', 'title': 'Жутко громко и запредельно близко', 'genre': 'Драма', 'pages': 624}
     ]
     return render_template('books.html', books=books_list)
+
+@app.route('/lab2/nerves')
+def nerves_songs():
+    songs_list = [
+        {'title': 'Перегорели', 'image': 'peregoreli.jpg', 'description': 'Моя любимая песня', 'year': 2015},
+        {'title': 'Нервы', 'image': 'nervy.jpg', 'description': 'Снова праздник, снова ты', 'year': 2016},
+        {'title': 'Батареи', 'image': 'baterii.jpg', 'description': 'Батареи заплакали', 'year': 2015},
+        {'title': 'Кофе мой друг', 'image': 'kofe_moy_drug.jpg', 'description': 'До 2022 была кофейня с анаогичным названием', 'year': 2016},
+        {'title': 'Слишком влюблён', 'image': 'slishkom_vlyublen.webp', 'description': 'Первая песня, которую я сыграла на барабанах', 'year': 2017},
+        {'title': 'Родной город', 'image': 'rodnoy_gorod.jpg', 'description': 'Одна из любимых', 'year': 2015},
+        {'title': 'Мой друг', 'image': 'moy_drug.jpg', 'description': 'Посвящена дружбе', 'year': 2020},
+        {'title': 'Потери', 'image': 'poteri.jpg', 'description': 'Трек из последнего альбома', 'year': 2020},
+        {'title': 'Вклочья', 'image': 'vklochia.jpg', 'description': '110%', 'year': 2017},
+        {'title': 'Отрицательный герой', 'image': 'geroy.webp', 'description': 'Я падаю вниз, я срываюсь со всех краев', 'year': 2019},
+        {'title': 'Ты права', 'image': 'ti_prava.webp', 'description': 'Конечно, я всегда права', 'year': 2018},
+        {'title': 'Костёр', 'image': 'koster.webp', 'description': 'Самый старый альбом', 'year': 2016},
+        {'title': 'Вороны', 'image': 'vorony.jpg', 'description': 'По моей команте гуляют черные вороны', 'year': 2017},
+        {'title': 'Мои демоны', 'image': 'demon.jpg', 'description': 'Ты их сделала!', 'year': 2019},
+        {'title': 'Лучшая жизнь', 'image': 'best_life.jpg', 'description': 'Лучшей жизни, чем в моих руках', 'year': 2018},
+        {'title': 'На вынос', 'image': 'na_vinos.jpg', 'description': 'Альбом "7"', 'year': 2020},
+        {'title': 'Укачу', 'image': 'ukachu.jpg', 'description': 'Я укачу от тебя, да я не шучу', 'year': 2019},
+        {'title': 'Этому городу', 'image': 'town.jpg', 'description': 'Ностальгия по 2020', 'year': 2017},
+        {'title': 'А А А', 'image': 'a.jpg', 'description': 'АААААААААААААА', 'year': 2018},
+        {'title': 'Лампами', 'image': 'lamps.jpeg', 'description': 'Трек Жени и Ромы', 'year': 2021}
+    ]
+    return render_template('nerves.html', songs=songs_list)

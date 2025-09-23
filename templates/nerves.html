@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 2{% endblock %}
+
+{% block main %}
+<h1>Песни группы "Нервы"</h1>
+<div class="songs-container">
+    {% for song in songs %}
+    <div class="song-item">
+        <img src="{{ url_for('static', filename='nerves/' + song.image) }}" 
+             width="500" 
+             height="320">
+        <h3>{{ song.title }}</h3>
+        <p class="year">Год: {{ song.year }}</p>
+        <p class="description">{{ song.description }}</p><br><br>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
