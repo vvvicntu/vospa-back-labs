@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 2{% endblock %}
+
+{% block main %}
+<h1>Калькулятор</h1>
+
+<div>
+    <p>Параметры: a = {{ a }}, b = {{ b }}</p>
+    <ul>
+        <li>{{ a }} + {{ b }} = {{ operations.sum }}</li>
+        <li>{{ a }} - {{ b }} = {{ operations.diff }}</li>
+        <li>{{ a }} × {{ b }} = {{ operations.mult }}</li>
+        <li>{{ a }} / {{ b }} = {{ operations.div }}</li>
+        <li>{{ a }}<sup>{{ b }}</sup> = {{ operations.pow }}</li>
+    </ul>
+</div>
+
+<a href="/lab2/">Назад к списку страниц</a>
+{% endblock %}
