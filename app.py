@@ -679,3 +679,19 @@ def calc(a, b):
         'pow': a ** b
     }
     return render_template('calc.html', a=a, b=b, operations=operations)
+
+@app.route('/lab2/books')
+def books():
+    books_list = [
+        {'author': 'Энтони Берджес', 'title': 'Заводной апельсин', 'genre': 'Роман', 'pages': 671},
+        {'author': 'Лев Толстой', 'title': 'Война и мир', 'genre': 'Роман-эпопея', 'pages': 1225},
+        {'author': 'Джейн Остен', 'title': 'Гордость и предубеждение', 'genre': 'Роман', 'pages': 350},
+        {'author': 'Михаил Булгаков', 'title': 'Мастер и Маргарита', 'genre': 'Роман', 'pages': 480},
+        {'author': 'Александр Пушкин', 'title': 'Евгений Онегин', 'genre': 'Роман в стихах', 'pages': 240},
+        {'author': 'Николай Гоголь', 'title': 'Мёртвые души', 'genre': 'Поэма', 'pages': 352},
+        {'author': 'Уильям Голдинг', 'title': 'Повелитель мух', 'genre': 'Роман', 'pages': 288},
+        {'author': 'Кристина Старк', 'title': 'Крылья', 'genre': 'Роман', 'pages': 840},
+        {'author': 'Владимир Набоков', 'title': 'Лолита', 'genre': 'Роман', 'pages': 336},
+        {'author': 'Джонатан С. Фоер', 'title': 'Жутко громко и запредельно близко', 'genre': 'Драма', 'pages': 624}
+    ]
+    return render_template('books.html', books=books_list)
