@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Все пива</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            margin: 20px;
+            background-color: #c6c5f4;
+        }
+
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #9f00b1;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Список всех пив:</h1>
+            
+        <div>
+            <p><b>Всего бутылок:</b> {{ total_count }}</p>
+        </div>
+            
+        <ul>
+            {% for flower in flower_list %}
+            <li>{{ flower }}</li>
+            {% endfor %}
+        </ul>
+            
+        <div>
+            <a href="/lab2/clear_flowers" class="clear-link">Очистить список</a><br>
+            <a href="/lab2/">Назад к лабораторной</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -509,14 +509,23 @@ def a1():
 def a2():
     return 'со слешем'
 
+
 flower_list = ['Bud', 'Essa', 'Старый мельник', 'Krone']
+
+# Страница с ID
 @app.route('/lab2/flowers/<int:flower_id>')
 def flowers(flower_id):
     if flower_id >= len(flower_list):
         abort(404)
-    else: 
-        return "пиво к пивному букетику: " + flower_list[flower_id]
+    else:
+        return render_template(
+            'beer.html',
+            flower_name=flower_list[flower_id],
+            flower_id=flower_id,
+            total_count=len(flower_list)
+        )
 
+# Добавление нового пива   
 @app.route('/lab2/add_flower/<name>')
 def add_flower(name):
     flower_list.append(name)
@@ -531,6 +540,97 @@ def add_flower(name):
     </body>
 </html>
 '''
+
+# Весь список
+@app.route('/lab2/flowers')
+def all_flowers():
+    return render_template(
+        'all.html',
+        flower_list=flower_list,
+        total_count=len(flower_list)
+    )
+
+# Ошибка 400
+@app.route('/lab2/add_flower/')
+def add_flower_empty():
+    style = url_for("static", filename="main.css")
+    beer = url_for("static", filename="beer.jpg")
+    return '''
+    <!doctype html>
+    <html>
+        <head>
+            <link rel="stylesheet" href="''' + style + '''">
+            <style>
+                body {
+                    text-align: center;
+                    font-family: Arial, sans-serif;
+                    margin: 50px;
+                    font-size: 25px;
+                }
+                img {
+                    margin: 20px auto;
+                    max-width: 500px;
+                    border-radius: 10px;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Ошибка 400</h1>
+            <p>Вы не задали марку пива</p>
+            <img src="''' + beer + '''" alt="Пиво">
+            <p><a href="/lab2/">Вернуться к лабораторной работе</a></p>
+        </body>
+    </html>
+    ''', 400
+
+# Очистка списка
+@app.route('/lab2/clear_flowers')
+def clear_flowers():
+    flower_list.clear()
+    return '''
+    <!doctype html>
+    <html>
+        <head>
+            <title>Список очищен</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 50px;
+                    background-color: rgb(204, 229, 255);
+                }
+                .success {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background: white;
+                    padding: 30px;
+                    text-align: center;
+                }
+                
+                .btn {
+                    display: inline-block;
+                    margin: 10px;
+                    padding: 12px 24px;
+                    background: #0066cc;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    transition: background 0.3s;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="success">
+                <div>
+                    <h1>Список пив очищен!</h1>
+                    <p>Все бутылки были убраны из коллекции.</p>
+                </div>
+                <a href="/lab2/flowers" class="btn">Перейти к списку пив</a>
+                <a href="/lab2/add_flower/Жигулевское" class="btn"> Добавить Жигулевское</a>
+                <a href="/lab2/" class="btn">Назад к лабораторной</a>
+            </div>
+        </body>
+    </html>
+    '''
 
 @app.route('/lab2/example')
 def example():
