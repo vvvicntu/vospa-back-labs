@@ -26,6 +26,10 @@
             <li>{{ loop.index }} - {{ f.name }}: {{ f.talisman }} &#9734;</li>
             {% endfor %}
         </ul>
+
+        <nav>
+            <a class="btn" href="{{ url_for('index') }}">На главную</a>
+        </nav>
     </main>
 
     <footer>

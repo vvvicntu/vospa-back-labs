@@ -102,6 +102,10 @@ def index():
             <nav>
                 <a href="/lab1">Лабораторная работа №1</a>
             </nav>
+
+            <nav>
+                <a href="/lab2">Лабораторная работа №2</a>
+            </nav>
             
             <footer>
                 Воспанчук Виктория Владимировна, ФБИ-31, 3 курс, 2023
@@ -721,3 +725,4 @@ def nerves_songs():
         {'title': 'Лампами', 'image': 'lamps.jpeg', 'description': 'Трек Жени и Ромы', 'year': 2021}
     ]
     return render_template('nerves.html', songs=songs_list)
+
