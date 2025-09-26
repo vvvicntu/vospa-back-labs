@@ -5,14 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Пиво {{ flower_name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='beer.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
     <body>
         <h1>Пиво к пивному букетику:</h1>
         <h2>{{ flower_name }}</h2>
+        <p>Цена: {{ flower_price }} руб.</p>
         <p><b>ID:</b> {{ flower_id }}</p>
         <p><b>Всего бутылок в коллекции:</b> {{ total_count }}</p>
         <br>
-        <a href="/lab2/flowers">← Вернуться к списку всех пив</a><br>
-        <a href="/lab2/">← Назад к лабораторной работе</a>
+
+        <a href="/lab2/flowers">Вернуться к списку всего пива</a><br><br>
+        
+        <nav>
+                <a class="btn" href="{{ url_for('index') }}">На главную</a>
+        </nav>
     </body>
 </html>

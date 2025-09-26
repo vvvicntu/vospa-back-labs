@@ -1,50 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Все пива</title>
+    <title>Список пива</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <style>
         main {
-            padding: 10px;
-            padding-left: 60px;
+            font-family: Arial, sans-serif;
+            margin: 10px;
+        }
+        a {
+            color: #d9534f;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        form {
+            margin-top: 20px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+        .danger {
+            background-color: #e64141;
+            color: rgb(109, 5, 5);
+            margin-left: 120px;
+        }
+        .danger:hover {
+            background: #c9302c;
         }
     </style>
+        
 </head>
 <body>
     <header>
-        <b>WEB-программирование, часть 2. {% if lab_num %}Лабораторная работа 2{% endif %}</b>
+        <b>WEB-программирование, часть 2. Лабораторная работа 2</b>
     </header>
     <main>
-        <div>
-            <h1>Список всего пива:</h1>
-                
-            <div>
-                <p><b>Всего бутылок:</b> {{ total_count }}</p>
-            </div>
-                
-            <ul>
-                {% for flower in flower_list %}
-                <li>{{ flower }}</li>
-                {% endfor %}
-            </ul>
-                
-            <div>
-                <a href="/lab2/clear_flowers" class="clear-link">Очистить список</a><br>
-                <a href="/lab2/">Назад к лабораторной</a>
-            </div>
+        <h1>Список пива</h1>
+        <h2>Всего сортов: {{ total_count }}</h2>
 
-            <nav>
-                <a class="btn" href="{{ url_for('index') }}">На главную</a>
-            </nav>
-        </div>
+        <ul>
+            {% for beer in flower_list %}
+            <li>
+                {{ beer.name }} - {{ beer.price }} ₽
+                <a href="{{ url_for('del_flower', flower_id=loop.index0) }}">Удалить</a>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <form action="{{ url_for('add_flower_empty') }}" method="GET">
+            <input type="text" name="name" placeholder="Название пива" required>
+            <input type="number" name="price" placeholder="Цена" required>
+            <button type="submit">Добавить</button>
+        </form>
+
+        <br>
+        <a href="{{ url_for('clear_flowers') }}" class="danger">Удалить все пиво</a>
+        <br><br>
+        <nav>
+            <a class="btn" href="{{ url_for('index') }}">На главную</a>
+        </nav>
     </main>
-
     <footer>
          &copy; Воспанчук Виктория, ФБИ-31, 3 курс, 2025
-    </footer>
     </footer>
 </body>
 </html>

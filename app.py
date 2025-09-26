@@ -514,7 +514,12 @@ def a2():
     return 'со слешем'
 
 
-flower_list = ['Bud', 'Essa', 'Старый мельник', 'Krone']
+flower_list = [
+    {'name': 'Bud', 'price': 100},
+    {'name': 'Старый мельник', 'price': 60},
+    {'name': 'Essa', 'price': 70},
+    {'name': 'Krone', 'price': 200}
+]
 
 # Страница с ID
 @app.route('/lab2/flowers/<int:flower_id>')
@@ -522,28 +527,36 @@ def flowers(flower_id):
     if flower_id >= len(flower_list):
         abort(404)
     else:
+        flower = flower_list[flower_id] 
         return render_template(
             'beer.html',
-            flower_name=flower_list[flower_id],
+            flower_name=flower['name'],  
+            flower_price=flower['price'], 
             flower_id=flower_id,
             total_count=len(flower_list)
         )
 
 # Добавление нового пива   
-@app.route('/lab2/add_flower/<name>')
-def add_flower(name):
-    flower_list.append(name)
-    return  f'''
-<!doctype html>
-<html>
-    <body>
-    <h1>Добавлено новое пиво!</h1>
-    <p>Марка нового пива: {name}</p>
-    <p>Всего бутылок: {len(flower_list)} </p>
-    <p>Полный список: {flower_list}</p>
-    </body>
-</html>
-'''
+@app.route('/lab2/add_flower/<name>/<int:price>')
+def add_flower(name, price):
+    flower_list.append({'name': name, 'price': price})
+    return render_template('add.html', 
+                         name=name, 
+                         price=price,
+                         total_count=len(flower_list))
+
+
+# Удаление пива по номеру
+@app.route('/lab2/del_flower/<int:flower_id>')
+def del_flower(flower_id):
+    if flower_id >= len(flower_list):
+        abort(404)
+    else:
+        # Удаляем пиво из списка
+        deleted_beer = flower_list.pop(flower_id)
+        # Перенаправляем на страницу со списком
+        return redirect(url_for('all_flowers'))
+    
 
 # Весь список
 @app.route('/lab2/flowers')
@@ -554,38 +567,26 @@ def all_flowers():
         total_count=len(flower_list)
     )
 
-# Ошибка 400
 @app.route('/lab2/add_flower/')
 def add_flower_empty():
-    style = url_for("static", filename="main.css")
-    beer = url_for("static", filename="beer.jpg")
-    return '''
-    <!doctype html>
-    <html>
-        <head>
-            <link rel="stylesheet" href="''' + style + '''">
-            <style>
-                body {
-                    text-align: center;
-                    font-family: Arial, sans-serif;
-                    margin: 50px;
-                    font-size: 25px;
-                }
-                img {
-                    margin: 20px auto;
-                    max-width: 500px;
-                    border-radius: 10px;
-                }
-            </style>
-        </head>
-        <body>
-            <h1>Ошибка 400</h1>
-            <p>Вы не задали марку пива</p>
-            <img src="''' + beer + '''" alt="Пиво">
-            <p><a href="/lab2/">Вернуться к лабораторной работе</a></p>
-        </body>
-    </html>
-    ''', 400
+    name = request.args.get('name')
+    price = request.args.get('price', type=int)
+
+    if not name or price is None:
+        return '''
+        <!doctype html>
+        <html>
+            <head><title>Ошибка 400</title></head>
+            <body>
+                <h1>Ошибка 400</h1>
+                <p>Вы не задали название или цену пива</p>
+                <a href="/lab2/flowers">Вернуться к списку</a>
+            </body>
+        </html>
+        ''', 400
+
+    flower_list.append({'name': name, 'price': price})
+    return redirect(url_for('all_flowers'))
 
 # Очистка списка
 @app.route('/lab2/clear_flowers')
