@@ -626,11 +626,11 @@ def clear_flowers():
         <body>
             <div class="success">
                 <div>
-                    <h1>Список пив очищен!</h1>
+                    <h1>Список пива очищен!</h1>
                     <p>Все бутылки были убраны из коллекции.</p>
                 </div>
                 <a href="/lab2/flowers" class="btn">Перейти к списку пив</a>
-                <a href="/lab2/add_flower/Жигулевское" class="btn"> Добавить Жигулевское</a>
+                <a href="/lab2/add_flower/Жигулевское/50" class="btn"> Добавить Жигулевское</a>
                 <a href="/lab2/" class="btn">Назад к лабораторной</a>
             </div>
         </body>
