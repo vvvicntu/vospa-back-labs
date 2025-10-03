@@ -1,6 +1,12 @@
 from flask import Flask, url_for, request, redirect, abort, render_template
 from datetime import datetime
+from lab1 import lab1
+from lab2 import lab2
+
 app = Flask(__name__) 
+app.register_blueprint(lab1)
+app.register_blueprint(lab2)
+
 access_log = [] #история посещений сайта
 
 @app.errorhandler(404) #обработчик ошибки 404
@@ -55,7 +61,6 @@ def not_found(err):
 </html>''', 404
 
 @app.route("/")
-@app.route("/lab1/index")
 def index():
     return '''
 <!doctype html>
@@ -115,130 +120,7 @@ def index():
 </html>
 '''
 
-@app.route("/lab1/web")
-def web():
-    return """<!doctype html>
-        <html>
-           <body>
-               <h1>web-сервер на flask</h1>
-               <a href="/lab1/author">author</a>
-           <body> 
-        </html>""", 200, {"X-Server": "sample",
-                          'Content-Type': 'text/csv; charset=utf-8'
-                          }
 
-@app.route("/lab1/author")
-def author():
-    name = 'Воспанчук Виктория Владимировна'
-    group = 'ФБИ-31'
-    faculty = 'ФБ'
-
-    return """<!doctype html>
-    <html>
-        <body>
-            <p>Студент: """ + name + """ </p>
-            <p>Группа: """ + group + """ </p>
-            <p>Факультет: """ + faculty + """ </p>
-            <a href="/lab1/web">web</a>
-            <br>
-            <a href="/">На главную</a>
-        </body>
-    </html>"""
-
-@app.route("/lab1/image")
-def image():
-    path = url_for("static", filename="ledy bag.png")
-    css_path = url_for("static", filename="lab1.css")
-    
-    return '''
-<!doctype html>
-<html>
-    <head>
-        <link rel="stylesheet" href="''' + css_path + '''">
-    </head>
-    <body>
-        <h1>Леди Баг в шоке от back-end</h1>
-        <p>(и я тоже)</p>
-        <img src="''' + path + '''">
-        <br>
-        <a href="/">На главную</a>
-    </body>
-</html>
-''', 200, {"Content-Language": "ru-RU",
-           "X-Custom-Header": "MyCustomValue",
-           "X-Application-Version": "1.0.0",
-           "Content-Type": "text/html; charset=utf-8"
-          }
-
-count = 0 
-
-@app.route("/lab1/counter")
-def counter():
-    cold = url_for("static", filename="холодильник.jpg")
-    css_path = url_for("static", filename="lab1.css")
-    global count
-    count += 1
-    time = datetime.today()
-    url = request.url
-    client_ip = request.remote_addr
-    return '''
-<!doctype html>
-<html>
-    <head>
-        <link rel="stylesheet" href="''' + css_path + '''">
-    </head>
-    <body>
-        <h1>Сколько раз я открыл холодильник: ''' + str(count) + '''</h1>
-        <hr>
-        Дата и время: ''' + str(time) + '''<br>
-        Запрошенный адрес: ''' + url + '''<br>
-        Ваш IP-адрес: ''' + client_ip + '''<br>
-        <a href="/lab1/clear_counter">Очистить счетчик</a><br><br>
-        <img src="''' + cold + '''">
-        <br>
-        <a href="/">На главную</a>
-    </body>
-</html>
-'''
-
-@app.route("/lab1/clear_counter")
-def clear_counter():
-    css_path = url_for("static", filename="lab1.css")
-    global count
-    count = 0
-    return '''
-<!doctype html>
-<html>
-    <head>
-        <link rel="stylesheet" href="''' + css_path + '''">
-    </head>
-    <body>
-        <h1>Холодильник закрыт :(</h1>
-        <p>Текущее значение счетчика: 0</p>
-        <a href="/lab1/counter">Перейти к счетчику</a><br>
-        <a href="/">На главную</a>
-    </body>
-</html>
-'''
-
-@app.route("/lab1/info")
-def info():
-    return redirect("/lab1/author")
-
-@app.route("/lab1/created")
-def created():
-    return '''
-<!doctype html>
-<html>
-    <body>
-        <h1>Создано успешно</h1>
-        <div><i>что-то создано...</i></div>
-    <body>
-</html>
-''', 201
-
-@app.route("/lab1")
-def lab1_index():
     return '''
 <!doctype html>
 <html>
@@ -347,144 +229,6 @@ def lab1_index():
 </html>
 '''
 
-@app.route("/lab1/error400")
-def error400():
-    style = url_for("static", filename="lab1.css")
-    return '''
-<!DOCTYPE html>
-<html lang="ru">
-    <head>
-        <link rel="stylesheet" href="''' + style + '''">
-        <title>Bad Request</title>
-    </head>
-    <body>
-        <h1>
-            Bad Request <br> 
-            400
-        </h1>
-        <div>
-            Ошибка 400 означает некорректный запрос
-        </div>
-    </body>
-</html>
-''', 400
-
-
-@app.route("/lab1/error401")
-def error401():
-    style = url_for("static", filename="lab1.css")
-    return '''
-<!DOCTYPE html>
-<html lang="ru">
-    <head>
-        <link rel="stylesheet" href="''' + style + '''">
-        <title>Unauthorized</title>
-    </head>
-    <body>
-        <h1>
-            Unauthorized<br>
-            401   
-        </h1>
-        <div>
-            Ошибка 401 возникает, когда вы не имеете разрешения на доступ к запрашиваемому ресурсу
-        </div>
-    </body>
-</html>
-''', 401
-
-@app.route("/lab1/error402")
-def error402():
-    style = url_for("static", filename="lab1.css")
-    return '''
-<!DOCTYPE html>
-<html lang="ru">
-    <head>
-        <link rel="stylesheet" href="''' + style + '''">
-        <title>Payment Required</title>
-    </head>
-    <body>
-        <h1>
-            Payment Required <br>
-            402
-        </h1>
-        <div>
-            Требуется оплата
-        </div>
-    </body>
-</html>
-''', 402
-
-@app.route("/lab1/error403")
-def error403():
-    style = url_for("static", filename="lab1.css")
-    return '''
-<!DOCTYPE html>
-<html lang="ru">
-    <head>
-        <link rel="stylesheet" href="''' + style + '''">
-        <title>Forbidden</title>
-    </head>
-    <body>
-        <h1>
-            Forbidden <br>
-            403
-        </h1>
-        <div>
-            Доступ к запрошенному ресурсу запрещён
-        </div>
-    </body>
-</html>
-''', 403
-
-@app.route("/lab1/error405")
-def error405():
-    style = url_for("static", filename="lab1.css")
-    return '''
-<!DOCTYPE html>
-<html lang="ru">
-    <head>
-        <link rel="stylesheet" href="''' + style + '''">
-        <title>Method Not Allowed</title>
-    </head>
-    <body>
-        <h1>
-            Method Not Allowed <br>
-            405
-        </h1>
-        <div>
-            Возникает, когда сервер распознает метод запроса, но не разрешает его для указанного ресурса.
-        </div>
-    </body>
-</html>
-''', 405
-
-@app.route("/lab1/error418")
-def error418():
-    style = url_for("static", filename="lab1.css")
-    return '''
-<!DOCTYPE html>
-<html lang="ru">
-    <head>
-        <link rel="stylesheet" href="''' + style + '''">
-        <title>I'm a teapot</title>
-    </head>
-    <body>
-        <h1>
-            I'm a teapot <br>
-            418
-        </h1>
-        <div>
-            Я чайник
-        </div>
-    </body>
-</html>
-''', 418
-
-@app.route("/lab1/error500")
-def cause_error_500():
-    result = 10 / 0
-    return "Эта строка никогда не будет показана"
-
 @app.errorhandler(500)
 def internal_server_error(err):
     style = url_for("static", filename="lab1.css")
@@ -502,6 +246,11 @@ def internal_server_error(err):
     </body>
 </html>
 ''', 500
+
+@app.route("/lab1/error500")
+def cause_error_500():
+    result = 10 / 0
+    return "Эта строка никогда не будет показана"
 
 #Лабораторная работа №2 
 
@@ -552,7 +301,7 @@ def del_flower(flower_id):
     if flower_id >= len(flower_list):
         abort(404)
     else:
-        # Удаляем пиво из списка
+        # Удаляем пиво из списка по индексу
         deleted_beer = flower_list.pop(flower_id)
         # Перенаправляем на страницу со списком
         return redirect(url_for('all_flowers'))
