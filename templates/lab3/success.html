@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 3{% endblock %}
+
+{% block main %}
+<style>
+    .success {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 30px;
+        background-color: #eddcff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+        text-align: center;
+    }
+    .galka {
+        font-size: 48px;
+        color: #6900ba;
+        margin-bottom: 20px;
+    }
+    .message {
+        font-size: 20px;
+        color: #030303;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+    .total {
+        font-weight: bold;
+        color: #6900ba;
+        font-size: 22px;
+    }
+    .but {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #3b006e;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+</style>
+
+<div class="success">
+    <div class="galka">✓</div>
+    <div class="message">
+        Спасибо, ваш заказ оплачен на сумму 
+        <span class="total">{{ price }} рублей</span>
+    </div>
+    <a href="/lab3/order" class="but">Вернуться к заказу</a>
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 3{% endblock %}
+
+{% block main %}
+    <style>
+        .order-form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #3d037a;
+        }
+        .form {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #484748;
+            border-radius: 5px;
+        }
+        .title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #15204f;
+        }
+        label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        
+        .price {
+            float: right;
+            color: #b60707;
+            font-weight: bold;
+        }
+        .order-button {
+            width: 100%;
+            padding: 12px;
+            background: #05305f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+
+    <div class="order-form">
+        <h1>Заказ напитка</h1>
+
+        <form action="/lab3/pay">
+            <div class="form">
+                <div class="title">Напиток:</div>
+                <label>
+                    <input type="radio" value="cofee" name="drink" checked>
+                    кофе <span class="price">120 ₽</span>
+                </label>
+                <label>
+                    <input type="radio" value="black-tea" name="drink">
+                    чёрный чай <span class="price">80 ₽</span>
+                </label>
+                <label>
+                    <input type="radio" value="green-tea" name="drink">
+                    зелёный чай <span class="price">90 ₽</span>
+                </label>
+            </div>
+
+            <div class="form">
+                <div class="title">Добавки:</div>
+                <label>
+                    <input type="checkbox" name="milk">
+                    молоко <span class="price">+30 ₽</span>
+                </label>
+                <label>
+                    <input type="checkbox" name="sugar">
+                    сахар <span class="price">+10 ₽</span>
+                </label>
+            </div>
+
+            <button type="submit" class="order-button">Заказать</button>
+        </form>
+    </div>
+{% endblock %}
