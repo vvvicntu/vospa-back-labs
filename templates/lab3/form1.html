@@ -4,43 +4,80 @@
 
 {% block main %} 
 
-    {% if user %}
+<style>
+    .error {
+        color: #ff0000;
+        font-size: 16px;
+        margin-top: 5px;
+        display: block;
+    }
+    .form {
+        margin-bottom: 15px;
+        margin-left: 20px;
+    }
+    .hr {
+        display: block;
+        margin-left: 20px;
+        border: 2px solid rgb(17, 17, 88);
+        padding: 10px 20px;
+        width: fit-content;
+        text-decoration: none;
+        color: rgb(17, 17, 88); 
+        font-weight: bold;
+        border-radius: 5px;
+    }
 
-    <h1 style="text-align: left; margin-left: 20px;">Привет, {{ user }}!</h1>
+    h1 {
+        text-align: left;
+        margin-left: 20px;
+    }
+
+    button {
+        margin-left: 20px;
+
+    }
+</style>
+
+    {% if user and age and not errors.user and not errors.age %}
+
+    <h1>Привет, {{ user }}!</h1>
     <h2>Добро пожаловать на наш сайт!</h2>
 
-    <div style="margin-left: 20px;">ваш возраст: {{ age }}</div>
-    <div style="margin-left: 20px;">ваш пол: {{'макан' if sex == 'male' else 'мизулина' }}</div> <br>
+    <div>ваш возраст: {{ age }}</div>
+    <div>ваш пол: {{'макан' if sex == 'male' else 'мизулина' }}</div> <br>
     <div>
-        <a href="/lab3/form1" style="display: block; margin-left: 20px; 
-        border: 2px solid rgb(17, 17, 88); padding: 10px 20px; 
-        width: fit-content; text-decoration: none; color: rgb(17, 17, 88); 
-        font-weight: bold; border-radius: 5px;">Заново</a>
+        <a href="/lab3/form1" class="hr">Заново</a>
     </div>
+    
     {% else %}
 
     <h1>Пользователь</h1>
 
     <form>
-        <label>Ваше имя: </label>
-        <div>
-            <input type="text" placeholder="как вас зовут?" name="user">
-        </div>
-        <div>
-            <button type="submit">Отправить</button>
-        </div>
-
-        <label>Ваш возраст: </label>
-        <div>
-            <input type="number" name="age">
+        <div class="form">
+            <label>Ваше имя: </label>
+            <div>
+                <input type="text" placeholder="как вас зовут?" name="user" value="{{ user or '' }}">
+                <span class="error">{{ errors.user }}</span>
+            </div>
         </div>
 
-        <label>Ваш пол: </label>
-        <div>
-            <select name="sex">
-                <option value="male">макан</option>
-                <option value="female">мизулина</option>
-            </select>
+        <div class="form">
+            <label>Ваш возраст: </label>
+            <div>
+                <input type="number" placeholder="скалько вам лет?" name="age" value="{{ age or '' }}">
+                <span class="error">{{ errors.age }}</span>
+            </div>
+        </div>
+
+        <div class="form">
+            <label>Ваш пол: </label>
+            <div>
+                <select name="sex">
+                    <option value="male" {{ sex == 'male' and 'selected'}}>макан</option>
+                    <option value="female" {{ sex == 'female' and 'selected'}}>мизулина</option>
+                </select>
+            </div>
         </div>
 
         <div>

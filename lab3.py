@@ -29,4 +29,11 @@ def form1():
     user = request.args.get('user')
     age = request.args.get('age')
     sex = request.args.get('sex')
-    return render_template('lab3/form1.html', user=user, age=age, sex=sex)
+    
+    errors = {}
+    if user == '':
+        errors['user'] = 'Заполните поле!'
+    if age == '':
+        errors['age'] = 'Напишите возраст!'
+
+    return render_template('lab3/form1.html', user=user, age=age, sex=sex, errors=errors)
