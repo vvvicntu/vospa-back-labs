@@ -9,18 +9,18 @@
         <div>
             <label for="color">Цвет текста:</label>
             <input type="color" id="color" name="color" value="{{ color or '#000000' }}">
-        </div>
+        </div><br>
         
         <div>
             <label for="bg_color">Цвет фона:</label>
             <input type="color" id="bg_color" name="bg_color" value="{{ bg_color or '#ffffff' }}">
-        </div>
+        </div><br>
         
         <div>
             <label for="font_size">Размер шрифта (px):</label>
             <input type="number" id="font_size" name="font_size" min="8" max="72" 
                    value="{{ font_size or '16' }}">
-        </div>
+        </div><br>
         
         <div>
             <label for="font_weight">Начертание шрифта:</label>
@@ -29,7 +29,7 @@
                 <option value="bold" {{ 'selected' if font_weight == 'bold' }}>Жирный</option>
                 <option value="lighter" {{ 'selected' if font_weight == 'lighter' }}>Тонкий</option>
             </select>
-        </div>
+        </div><br>
         
         <div>
             <button type="submit">Применить</button>

@@ -28,7 +28,7 @@ def flowers(flower_id):
     else:
         flower = flower_list[flower_id] 
         return render_template(
-            'beer.html',
+            'lab2/beer.html',
             flower_name=flower['name'],  
             flower_price=flower['price'], 
             flower_id=flower_id,
@@ -39,8 +39,8 @@ def flowers(flower_id):
 # Добавление нового пива   
 @lab2.route('/lab2/add_flower/<name>/<int:price>')
 def add_flower(name, price):
-    flower_list.lab2end({'name': name, 'price': price})
-    return render_template('add.html', 
+    flower_list.append({'name': name, 'price': price})  # Исправлено: append вместо lab2end
+    return render_template('lab2/add.html', 
                          name=name, 
                          price=price,
                          total_count=len(flower_list))
@@ -55,14 +55,14 @@ def del_flower(flower_id):
         # Удаляем пиво из списка по индексу
         deleted_beer = flower_list.pop(flower_id)
         # Перенаправляем на страницу со списком
-        return redirect(url_for('all_flowers'))
+        return redirect(url_for('lab2.all_flowers'))  # Исправлено: lab2.all_flowers
     
 
 # Весь список
 @lab2.route('/lab2/flowers')
 def all_flowers():
     return render_template(
-        'all.html',
+        'lab2/all.html',
         flower_list=flower_list,
         total_count=len(flower_list)
     )
@@ -86,8 +86,8 @@ def add_flower_empty():
         </html>
         ''', 400
 
-    flower_list.lab2end({'name': name, 'price': price})
-    return redirect(url_for('all_flowers'))
+    flower_list.append({'name': name, 'price': price})  # Исправлено: append вместо lab2end
+    return redirect(url_for('lab2.all_flowers'))
 
 
 # Очистка списка
@@ -153,31 +153,31 @@ def example():
         {'name': 'сасс', 'talisman': 'змея'},
         {'name': 'триккс', 'talisman': 'лиса'}
     ]
-    return render_template('example.html', name=name, group=group, course=course, 
+    return render_template('lab2/example.html', name=name, group=group, course=course, 
                            lab_num=lab_num, kvami=kvami)
 
 
 @lab2.route('/lab2/')
 def lab():
-    return render_template('lab2.html')
+    return render_template('lab2/lab2.html')
 
 
 @lab2.route('/lab2/filters')
 def filters():
     phrase = "О <b>сколько</b> <u>нам</u> <i>открытий</i> чудных..."
-    return render_template('filter.html', phrase=phrase)
+    return render_template('lab2/filter.html', phrase=phrase)
 
 
 # Перенаправление на /lab2/calc/1/1
 @lab2.route('/lab2/calc/')
 def calc_default():
-    return redirect(url_for('calc', a=1, b=1))
+    return redirect(url_for('lab2.calc', a=1, b=1))  # Исправлено: lab2.calc
 
 
 # Перенаправление на /lab2/calc/a/1
 @lab2.route('/lab2/calc/<int:a>')
 def calc_single(a):
-    return redirect(url_for('calc', a=a, b=1))
+    return redirect(url_for('lab2.calc', a=a, b=1))  # Исправлено: lab2.calc
 
 
 # Основной обработчик калькулятора
@@ -191,7 +191,7 @@ def calc(a, b):
         'div': a / b if b != 0 else 'деление на ноль',
         'pow': a ** b
     }
-    return render_template('calc.html', a=a, b=b, operations=operations)
+    return render_template('lab2/calc.html', a=a, b=b, operations=operations)
 
 
 @lab2.route('/lab2/books')
@@ -208,7 +208,7 @@ def books():
         {'author': 'Владимир Набоков', 'title': 'Лолита', 'genre': 'Роман', 'pages': 336},
         {'author': 'Джонатан С. Фоер', 'title': 'Жутко громко и запредельно близко', 'genre': 'Драма', 'pages': 624}
     ]
-    return render_template('books.html', books=books_list)
+    return render_template('lab2/books.html', books=books_list)
 
 
 @lab2.route('/lab2/nerves')
@@ -235,4 +235,4 @@ def nerves_songs():
         {'title': 'А А А', 'image': 'a.jpg', 'description': 'АААААААААААААА', 'year': 2018},
         {'title': 'Лампами', 'image': 'lamps.jpeg', 'description': 'Трек Жени и Ромы', 'year': 2021}
     ]
-    return render_template('nerves.html', songs=songs_list)
+    return render_template('lab2/nerves.html', songs=songs_list)

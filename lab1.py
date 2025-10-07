@@ -2,67 +2,6 @@ from flask import Blueprint, url_for, request, redirect
 from datetime import datetime 
 lab1 = Blueprint('lab1', __name__)
 
-@lab1.route("/lab1/index")
-def index():
-    return '''
-<!doctype html>
-<html>
-    <head>
-        <title>НГТУ, ФБ, Лабораторные работы</title>
-        <style>
-            body {
-                padding: 20px;
-                background-color: #fed8ee;
-            }
-            .off {
-                max-width: 800px;
-                margin: 0 auto;
-                background: white;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 2px 10px black;
-            }
-            header {
-                background: #c3418d;;
-                color: white;
-                padding: 20px;
-                text-align: center;
-                border-radius: 5px;
-                margin-bottom: 20px;
-            }
-            footer {
-                background: #c3418d;;
-                color: white;
-                padding: 15px;
-                text-align: center;
-                border-radius: 5px;
-                margin-top: 20px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="off">
-            <header>
-                <h1>НГТУ, ФБ, WEB-программирование, часть 2. Список лабораторных</h1>
-            </header>
-            
-            <nav>
-                <a href="/lab1">Лабораторная работа №1</a>
-            </nav>
-
-            <nav>
-                <a href="/lab2">Лабораторная работа №2</a>
-            </nav>
-            
-            <footer>
-                Воспанчук Виктория Владимировна, ФБИ-31, 3 курс, 2023
-            </footer>
-        </div>
-    </body>
-</html>
-'''
-
-
 @lab1.route("/lab1/web")
 def web():
     return """<!doctype html>
@@ -97,8 +36,8 @@ def author():
 
 @lab1.route("/lab1/image")
 def image():
-    path = url_for("static", filename="ledy bag.png")
-    css_path = url_for("static", filename="lab1.css")
+    path = url_for("static", filename="lab1/ledy bag.png")
+    css_path = url_for("static", filename="lab1/lab1.css")  # Исправлен путь
     
     return '''
 <!doctype html>
@@ -116,7 +55,7 @@ def image():
 </html>
 ''', 200, {"Content-Language": "ru-RU",
            "X-Custom-Header": "MyCustomValue",
-           "X-lab1lication-Version": "1.0.0",
+           "X-Application-Version": "1.0.0",  # Исправлено: X-Application-Version
            "Content-Type": "text/html; charset=utf-8"
           }
 
@@ -124,8 +63,8 @@ count = 0
 
 @lab1.route("/lab1/counter")
 def counter():
-    cold = url_for("static", filename="холодильник.jpg")
-    css_path = url_for("static", filename="lab1.css")
+    cold = url_for("static", filename="lab1/холодильник.jpg")  # Исправлен путь
+    css_path = url_for("static", filename="lab1/lab1.css")  # Исправлен путь
     global count
     count += 1
     time = datetime.today()
@@ -154,7 +93,7 @@ def counter():
 
 @lab1.route("/lab1/clear_counter")
 def clear_counter():
-    css_path = url_for("static", filename="lab1.css")
+    css_path = url_for("static", filename="lab1/lab1.css")  # Исправлен путь
     global count
     count = 0
     return '''
@@ -269,7 +208,7 @@ def lab1_index():
             <div class="content">
                 Flask — фреймворк для создания веб-приложений на языке
                 программирования Python, использующий набор инструментов
-                Werkzeug, а также шаблонизатор Jinja2. Отrelativeтся к категории так
+                Werkzeug, а также шаблонизатор Jinja2. Относится к категории так
                 называемых микрофреймворков — минималистичных каркасов
                 веб-приложений, сознательно предоставляющих лишь самые ба
                 зовые возможности.
@@ -279,7 +218,7 @@ def lab1_index():
 
             <h2>Список роутов</h2>
             <div class="routes-list">
-                <a href="/index">Главная страница</a>
+                <a href="/">Главная страница</a>
                 <a href="/lab1">Лабораторная работа 1</a>
                 <a href="/lab1/web">Web-сервер</a>
                 <a href="/lab1/author">Информация об авторе</a>
@@ -302,30 +241,9 @@ def lab1_index():
 '''
 
 
-    style = url_for("static", filename="lab1.css")
-    return '''
-<!DOCTYPE html>
-<html lang="ru">
-    <head>
-        <link rel="stylesheet" href="''' + style + '''">
-        <title>I'm a teapot</title>
-    </head>
-    <body>
-        <h1>
-            I'm a teapot <br>
-            418
-        </h1>
-        <div>
-            Я чайник
-        </div>
-    </body>
-</html>
-''', 418
-
-
 @lab1.route("/lab1/error400")
 def error400():
-    style = url_for("static", filename="lab1.css")
+    style = url_for("static", filename="lab1/lab1.css")  # Исправлен путь
     return '''
 <!DOCTYPE html>
 <html lang="ru">
@@ -348,7 +266,7 @@ def error400():
 
 @lab1.route("/lab1/error401")
 def error401():
-    style = url_for("static", filename="lab1.css")
+    style = url_for("static", filename="lab1/lab1.css")  # Исправлен путь
     return '''
 <!DOCTYPE html>
 <html lang="ru">
@@ -371,7 +289,7 @@ def error401():
 
 @lab1.route("/lab1/error402")
 def error402():
-    style = url_for("static", filename="lab1.css")
+    style = url_for("static", filename="lab1/lab1.css")  # Исправлен путь
     return '''
 <!DOCTYPE html>
 <html lang="ru">
@@ -394,7 +312,7 @@ def error402():
 
 @lab1.route("/lab1/error403")
 def error403():
-    style = url_for("static", filename="lab1.css")
+    style = url_for("static", filename="lab1/lab1.css")  # Исправлен путь
     return '''
 <!DOCTYPE html>
 <html lang="ru">
@@ -417,7 +335,7 @@ def error403():
 
 @lab1.route("/lab1/error405")
 def error405():
-    style = url_for("static", filename="lab1.css")
+    style = url_for("static", filename="lab1/lab1.css")  # Исправлен путь
     return '''
 <!DOCTYPE html>
 <html lang="ru">
@@ -440,7 +358,7 @@ def error405():
 
 @lab1.route("/lab1/error418")
 def error418():
-    style = url_for("static", filename="lab1.css")
+    style = url_for("static", filename="lab1/lab1.css")  # Исправлен путь
     return '''
 <!DOCTYPE html>
 <html lang="ru">

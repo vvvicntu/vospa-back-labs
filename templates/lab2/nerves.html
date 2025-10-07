@@ -7,7 +7,7 @@
 <div class="songs-container">
     {% for song in songs %}
     <div class="song-item">
-        <img src="{{ url_for('static', filename='nerves/' + song.image) }}" 
+        <img src="{{ url_for('static', filename='lab2/nerves/' + song.image) }}" 
              width="500" 
              height="320">
         <h3>{{ song.title }}</h3>
