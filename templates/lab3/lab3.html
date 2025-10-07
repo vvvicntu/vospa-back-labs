@@ -4,15 +4,15 @@
 
 {% block main %} 
     <h1>Формы, cookie</h1>
-    <div>Привет, <span style="color: {{name_color}}">{{ name }}</span></div>
+    <div>Привет, <span style="color: {{name_color or 'black'}}">{{ name }}</span>!</div>
+    <div>Возраст: {{ age }} лет</div>
     <div>Список сделанных страниц: </div>
 
     <ol>
         <li><a href="/lab3/cookie">Куки</a></li>
         <li><a href="/lab3/del_cookie">Удалить куки</a></li>
-        <li><a href=" /lab3/form1">Макан или Мизулина?</a></li>
-        <li><a href=" /lab3/order">Заказик</a></li>
-        <li><a href=" /lab3/settings">Настройки</a></li>
-    </ol>
+        <li><a href="/lab3/form1">Макан или Мизулина?</a></li>
+        <li><a href="/lab3/order">Заказик</a></li>
+        <li><a href="/lab3/settings">Настройки</a></li>
     </ol>
 {% endblock %}
