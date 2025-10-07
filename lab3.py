@@ -57,7 +57,7 @@ def pay():
     elif drink == 'black-tea':
         price = 80
     else:
-        price = 70
+        price = 90
 
 
     if request.args.get('milk') == 'on':
