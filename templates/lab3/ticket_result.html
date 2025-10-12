@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 3{% endblock %}
+
+{% block main %}
+    <style>
+        .ticket {
+            border: 2px solid #333;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .t_z {
+            text-align: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .ticket-type {
+            color: #940e0e;
+            font-size: 20px;
+        }
+        
+        .ticket-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .ticket-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #333;
+        }
+        
+        .mess {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .price {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        b {
+            color: #2c3e50;
+        }
+        
+        .new-ticket-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+
+    <div class="ticket">
+        <div class="t_z">
+            <h2>ЭЛЕКТРОННЫЙ ЖЕЛЕЗНОДОРОЖНЫЙ БИЛЕТ</h2>
+            <div class="ticket-type">{{ ticket_type }}</div>
+        </div>
+        
+        <div class="ticket-grid ticket-row">
+            <div><b>Пассажир:</b></div>
+            <div>{{ fio }}</div>
+            
+            <div><b>Возраст:</b></div>
+            <div>{{ age }} лет</div>
+            
+            <div><b>Маршрут:</b></div>
+            <div>{{ departure }} → {{ destination }}</div>
+            
+            <div><b>Дата:</b></div>
+            <div>{{ date }}</div>
+            
+            <div><b>Полка:</b></div>
+            <div>
+                {% if shelf == 'lower' %}Нижняя
+                {% elif shelf == 'upper' %}Верхняя
+                {% elif shelf == 'upper-side' %}Верхняя боковая
+                {% elif shelf == 'lower-side' %}Нижняя боковая
+                {% endif %}
+            </div>
+            
+            <div><b>Бельё:</b></div>
+            <div>{{ 'Да' if linen == 'yes' else 'Нет' }}</div>
+            
+            <div><b>Багаж:</b></div>
+            <div>{{ 'Да' if luggage == 'yes' else 'Нет' }}</div>
+            
+            <div><b>Страховка:</b></div>
+            <div>{{ 'Да' if insurance == 'yes' else 'Нет' }}</div>
+            
+            <div><b>Стоимость:</b></div>
+            <div class="price">{{ price }} руб.</div>
+        </div>
+        
+        <div class="ticket-footer">
+            <div class="mess">Билет оформлен успешно</div>
+        </div>
+    </div>
+
+    <div class="new-ticket-link">
+        <a href="/lab3/ticket">Оформить новый билет</a>
+    </div>
+{% endblock %}

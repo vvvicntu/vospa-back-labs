@@ -119,3 +119,108 @@ def settings():
         font_weight=font_weight
     ))
     return resp
+
+
+@lab3.route('/lab3/ticket')
+def ticket():
+    errors = {}
+    
+    # Получаем данные из формы
+    fio = request.args.get('fio')
+    polka = request.args.get('polka')
+    belyo = request.args.get('belyo')
+    luggage = request.args.get('luggage')
+    age = request.args.get('age')
+    departure = request.args.get('departure')
+    destination = request.args.get('destination')
+    date = request.args.get('date')
+    insurance = request.args.get('insurance')
+    
+    if fio == '':
+        errors['fio'] = 'Заполните поле!'
+    if polka == '':
+        errors['polka'] = 'Выберите полку!'
+    if belyo == '':
+        errors['belyo'] = 'Выберите вариант!'
+    if luggage == '':
+        errors['luggage'] = 'Выберите вариант!'
+    if age == '':
+        errors['age'] = 'Заполните возраст!'
+    elif age:
+        try:
+            age_int = int(age)
+            if age_int < 1 or age_int > 120:
+                errors['age'] = 'Возраст должен быть от 1 до 120 лет!'
+        except ValueError:
+            errors['age'] = 'Возраст должен быть числом!'
+    if departure == '':
+        errors['departure'] = 'Заполните поле!'
+    if destination == '':
+        errors['destination'] = 'Заполните поле!'
+    if date == '':
+        errors['date'] = 'Заполните дату!'
+    
+    # Если есть ошибки, показываем форму с ошибками
+    if errors:
+        return render_template('lab3/ticket_form.html', 
+                            fio=fio or '',
+                            polka=polka or '',
+                            belyo=belyo or '',
+                            luggage=luggage or '',
+                            age=age or '',
+                            departure=departure or '',
+                            destination=destination or '',
+                            date=date or '',
+                            insurance=insurance or 'no',
+                            errors=errors)
+    
+
+    if fio and polka and belyo and luggage and age and departure and destination and date:
+        # Расчёт стоимости билета
+        age_int = int(age)
+        
+        if age_int < 18:
+            price = 700  
+            ticket_type = "Детский билет"
+        else:
+            price = 1000 
+            ticket_type = "Взрослый билет"
+        
+        # Доплаты
+        if polka in ['lower', 'lower-side']:
+            price += 100  
+        
+        if belyo == 'yes':
+            price += 75  # Бельё
+        
+        if luggage == 'yes':
+            price += 250  # Багаж
+        
+        if insurance == 'yes':
+            price += 150  # Страховка
+        
+        return render_template('lab3/ticket_result.html',
+                             fio=fio,
+                             polka=polka,
+                             belyo=belyo,
+                             luggage=luggage,
+                             age=age,
+                             departure=departure,
+                             destination=destination,
+                             date=date,
+                             insurance=insurance,
+                             price=price,
+                             ticket_type=ticket_type)
+    
+    # Если форма не отправлена, показываем пустую форму
+    return render_template('lab3/ticket_form.html', 
+                         fio='',
+                         polka='',
+                         belyo='',
+                         luggage='',
+                         age='',
+                         departure='',
+                         destination='',
+                         date='',
+                         insurance='no',
+                         errors={})

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 3{% endblock %}
+
+{% block main %}
+    <style>
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 300px;
+        }
+        div {
+            margin-bottom: 15px;
+        }
+    </style>
+
+    <h1>Железнодорожный билет</h1>
+
+    <form>
+        <div>
+            <label>ФИО пассажира:</label>
+            <div>
+                <input type="text" name="fio" value="{{ fio or '' }}" placeholder="Введите ФИО">
+                <span class="error">{{ errors.fio }}</span>
+            </div>
+        </div>
+
+        <div>
+            <label>Полка:</label>
+            <div>
+                <select name="polka">
+                    <option value="">Выберите полку</option>
+                    <option value="lower" {{ 'selected' if polka == 'lower' }}>Нижняя</option>
+                    <option value="upper" {{ 'selected' if polka == 'upper' }}>Верхняя</option>
+                    <option value="upper-side" {{ 'selected' if polka == 'upper-side' }}>Верхняя боковая</option>
+                    <option value="lower-side" {{ 'selected' if polka == 'lower-side' }}>Нижняя боковая</option>
+                </select>
+                <span class="error">{{ errors.polka }}</span>
+            </div>
+        </div>
+
+        <div>
+            <label>С бельём:</label>
+            <div>
+                <label>
+                    <input type="radio" name="belyo" value="yes" {{ 'checked' if belyo == 'yes' }}>
+                    Да
+                </label>
+                <label>
+                    <input type="radio" name="belyo" value="no" {{ 'checked' if belyo == 'no' or not belyo }}>
+                    Нет
+                </label>
+                <span class="error">{{ errors.belyo }}</span>
+            </div>
+        </div>
+
+        <div>
+            <label>С багажом:</label>
+            <div>
+                <label>
+                    <input type="radio" name="luggage" value="yes" {{ 'checked' if luggage == 'yes' }}>
+                    Да
+                </label>
+                <label>
+                    <input type="radio" name="luggage" value="no" {{ 'checked' if luggage == 'no' or not luggage }}>
+                    Нет
+                </label>
+                <span class="error">{{ errors.luggage }}</span>
+            </div>
+        </div>
+
+        <div>
+            <label>Возраст:</label>
+            <div>
+                <input type="number" name="age" value="{{ age or '' }}" placeholder="Введите возраст" min="1" max="120">
+                <span class="error">{{ errors.age }}</span>
+            </div>
+        </div>
+
+        <div>
+            <label>Пункт выезда:</label>
+            <div>
+                <input type="text" name="departure" value="{{ departure or '' }}" placeholder="Откуда">
+                <span class="error">{{ errors.departure }}</span>
+            </div>
+        </div>
+
+        <div>
+            <label>Пункт назначения:</label>
+            <div>
+                <input type="text" name="destination" value="{{ destination or '' }}" placeholder="Куда">
+                <span class="error">{{ errors.destination }}</span>
+            </div>
+        </div>
+
+        <div>
+            <label>Дата поездки:</label>
+            <div>
+                <input type="date" name="date" value="{{ date or '' }}">
+                <span class="error">{{ errors.date }}</span>
+            </div>
+        </div>
+
+        <div>
+            <label>Страховка:</label>
+            <div>
+                <label>
+                    <input type="radio" name="insurance" value="yes" {{ 'checked' if insurance == 'yes' }}>
+                    Да
+                </label>
+                <label>
+                    <input type="radio" name="insurance" value="no" {{ 'checked' if insurance == 'no' or not insurance }}>
+                    Нет
+                </label>
+            </div>
+        </div>
+
+        <div>
+            <button type="submit">Оформить билет</button>
+        </div>
+    </form>
+{% endblock %}
