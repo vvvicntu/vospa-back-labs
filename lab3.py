@@ -235,3 +235,81 @@ def del_settings():
     resp.delete_cookie('font_size')
     resp.delete_cookie('font_weight')
     return resp
+
+
+@lab3.route('/lab3/cars')
+def cars():
+    # Список автомобилей
+    cars = [
+        {'name': 'Toyota Camry', 'brand': 'Toyota', 'color': 'Белый', 'price': 2500000},
+        {'name': 'Hyundai Solaris', 'brand': 'Hyundai', 'color': 'Синий', 'price': 1500000},
+        {'name': 'Kia Rio', 'brand': 'Kia', 'color': 'Черный', 'price': 1400000},
+        {'name': 'Lada Vesta', 'brand': 'Lada', 'color': 'Серый', 'price': 1300000},
+        {'name': 'BMW 3 Series', 'brand': 'BMW', 'color': 'Синий', 'price': 4200000},
+        {'name': 'Mercedes C-Class', 'brand': 'Mercedes', 'color': 'Белый', 'price': 4600000},
+        {'name': 'Audi A4', 'brand': 'Audi', 'color': 'Черный', 'price': 4400000},
+        {'name': 'Volkswagen Polo', 'brand': 'Volkswagen', 'color': 'Серебристый', 'price': 1400000},
+        {'name': 'Skoda Octavia', 'brand': 'Skoda', 'color': 'Серый', 'price': 2100000},
+        {'name': 'Mazda 6', 'brand': 'Mazda', 'color': 'Красный', 'price': 2800000},
+        {'name': 'Lexus ES', 'brand': 'Lexus', 'color': 'Белый', 'price': 5200000},
+        {'name': 'Nissan Qashqai', 'brand': 'Nissan', 'color': 'Черный', 'price': 2300000},
+        {'name': 'Renault Duster', 'brand': 'Renault', 'color': 'Зеленый', 'price': 1800000},
+        {'name': 'Chevrolet Tahoe', 'brand': 'Chevrolet', 'color': 'Черный', 'price': 7900000},
+        {'name': 'Tesla Model 3', 'brand': 'Tesla', 'color': 'Белый', 'price': 5600000},
+        {'name': 'Honda Civic', 'brand': 'Honda', 'color': 'Серый', 'price': 2000000},
+        {'name': 'Ford Focus', 'brand': 'Ford', 'color': 'Синий', 'price': 1700000},
+        {'name': 'Peugeot 408', 'brand': 'Peugeot', 'color': 'Белый', 'price': 1600000},
+        {'name': 'Mitsubishi Outlander', 'brand': 'Mitsubishi', 'color': 'Красный', 'price': 3200000},
+        {'name': 'Subaru Forester', 'brand': 'Subaru', 'color': 'Зеленый', 'price': 3400000}
+    ]
+
+    # Получаем значения из GET-запроса или кук
+    min_price = request.args.get('min_price') or request.cookies.get('min_price')
+    max_price = request.args.get('max_price') or request.cookies.get('max_price')
+
+    # Конвертируем в числа, если есть значения
+    try:
+        min_price = int(min_price) if min_price else None
+    except ValueError:
+        min_price = None
+    try:
+        max_price = int(max_price) if max_price else None
+    except ValueError:
+        max_price = None
+
+    # Если пользователь перепутал местами
+    if min_price and max_price and min_price > max_price:
+        min_price, max_price = max_price, min_price
+
+    # Фильтрация
+    filtered = []
+    for car in cars:
+        if (min_price is None or car['price'] >= min_price) and \
+           (max_price is None or car['price'] <= max_price):
+            filtered.append(car)
+
+    # Устанавливаем куки
+    resp = make_response(render_template(
+        'lab3/cars.html',
+        cars=filtered,
+        total=len(filtered),
+        min_price=min_price,
+        max_price=max_price
+    ))
+
+    if request.args.get('min_price') or request.args.get('max_price'):
+        if min_price:
+            resp.set_cookie('min_price', str(min_price))
+        if max_price:
+            resp.set_cookie('max_price', str(max_price))
+
+    return resp
+
+
+@lab3.route('/lab3/reset_cars')
+def reset_cars():
+    """Очистка фильтра и кук"""
+    resp = make_response(redirect('/lab3/cars'))
+    resp.delete_cookie('min_price')
+    resp.delete_cookie('max_price')
+    return resp
