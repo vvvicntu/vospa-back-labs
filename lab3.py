@@ -308,7 +308,7 @@ def cars():
 
 @lab3.route('/lab3/reset_cars')
 def reset_cars():
-    """Очистка фильтра и кук"""
+    # Очистка фильтра и кук
     resp = make_response(redirect('/lab3/cars'))
     resp.delete_cookie('min_price')
     resp.delete_cookie('max_price')
