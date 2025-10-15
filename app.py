@@ -116,8 +116,12 @@ def index():
                 <a href="/lab2">Лабораторная работа №2</a>
             </nav>
 
-             <nav>
+            <nav>
                 <a href="/lab3">Лабораторная работа №3</a>
+            </nav>
+
+            <nav>
+                <a href="/lab4">Лабораторная работа №4</a>
             </nav>
             
             <footer>
