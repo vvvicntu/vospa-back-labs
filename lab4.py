@@ -28,5 +28,60 @@ def div():
     return render_template('lab4/div.html', x1=x1, x2=x2, result=result)
 
 
+@lab4.route('/lab4/sum', methods = ['POST'])
+def sum():
+    x1 = request.form.get('x1')
+    x2 = request.form.get('x2')
+    
+    # если какое-либо из полей пустое, считаем что ввели 0
+    x1 = int(x1) if x1 != '' else 0
+    x2 = int(x2) if x2 != '' else 0
+    
+    result = x1 + x2
+    return render_template('lab4/sum.html', x1=x1, x2=x2, result=result)
+
+@lab4.route('/lab4/mult', methods = ['POST'])
+def mult():
+    x1 = request.form.get('x1')
+    x2 = request.form.get('x2')
+    
+    # если какое-либо из полей пустое, считаем что ввели 0
+    x1 = int(x1) if x1 != '' else 1
+    x2 = int(x2) if x2 != '' else 1
+    
+    result = x1 * x2
+    return render_template('lab4/mult.html', x1=x1, x2=x2, result=result)
+
+
+@lab4.route('/lab4/vichit', methods = ['POST'])
+def vichit():
+    x1 = request.form.get('x1')
+    x2 = request.form.get('x2')
+    
+    if x1 == '' or x2 == '':
+        return render_template('lab4/vichit.html', error = 'Оба поля должны быть заполнены!')
+    
+    x1 = int(x1)
+    x2 = int(x2)
+    result = x1 - x2
+    return render_template('lab4/vichit.html', x1=x1, x2=x2, result=result)
+
+
+@lab4.route('/lab4/step', methods = ['POST'])
+def step():
+    x1 = request.form.get('x1')
+    x2 = request.form.get('x2')
+    
+    if x1 == '' or x2 == '':
+        return render_template('lab4/step.html', error = 'Оба поля должны быть заполнены!')
+    
+    if x1 == '0' and x2 == '0':
+        return render_template('lab4/step.html', error = 'Числа не могут быть равны нулю!')
+    
+    x1 = int(x1)
+    x2 = int(x2)
+    result = x1 ** x2
+    return render_template('lab4/step.html', x1=x1, x2=x2, result=result)
+
 
 

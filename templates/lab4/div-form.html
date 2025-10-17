@@ -1,11 +1,40 @@
 {% extends "base.html" %}
 
-{% block lab %}Деление чисел{% endblock %}
+{% block lab %}Арифмитические операции{% endblock %}
 
 {% block main %} 
+    <style>
+        form {
+            text-align: center;
+        }
+    </style>
     <form  method="post" action="/lab4/div">
         <h1>Деление чисел</h1>
         <input type="number" name="x1"> / <input type="number" name="x2">
+        <input type="submit" value="=">
+    </form><br>
+
+    <form  method="post" action="/lab4/sum">
+        <h1>Сложение чисел</h1>
+        <input type="number" name="x1"> + <input type="number" name="x2">
+        <input type="submit" value="=">
+    </form><br>
+
+    <form  method="post" action="/lab4/mult">
+        <h1>Умножение чисел</h1>
+        <input type="number" name="x1"> * <input type="number" name="x2">
+        <input type="submit" value="=">
+    </form><br>
+
+    <form  method="post" action="/lab4/vichit">
+        <h1>Вычитание чисел</h1>
+        <input type="number" name="x1"> - <input type="number" name="x2">
+        <input type="submit" value="=">
+    </form><br>
+
+    <form  method="post" action="/lab4/step">
+        <h1>Возведение в степень</h1>
+        <input type="number" name="x1"> <sup><input type="number" name="x2"></sup> 
         <input type="submit" value="=">
     </form>
    
