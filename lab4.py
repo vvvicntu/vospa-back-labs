@@ -85,6 +85,7 @@ def step():
 
 tree_count = 0
 
+
 @lab4.route('/lab4/tree', methods=['GET', 'POST'])
 def tree():
     global tree_count
@@ -100,3 +101,21 @@ def tree():
         tree_count += 1 
     
     return redirect('/lab4/tree')
+
+
+@lab4.route('/lab4/login', methods = ['GET', 'POST'])
+def login():
+
+    # Если страница запрашивается методом GET, то пользователь 
+    # никаких данных ещё не передавал — вернём страницу с формой
+    if request.method == 'GET':
+        return render_template("lab4/login.html", authorized=False, error='')
+
+    login = request.form.get('login')
+    password = request.form.get('password')
+
+    if login == 'macan' and password == '666':
+        return render_template('/lab4/login.html', login=login, authorized=True)
+    
+    error = 'Неверные логин или пароль!'
+    return render_template('lab4/login.html', error=error, authorized=False)
