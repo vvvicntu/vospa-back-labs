@@ -190,3 +190,74 @@ def fridge():
                          success=f'Установлена температура: {temp}°C')
 
 
+@lab4.route('/lab4/grain', methods=['GET', 'POST'])
+def grain():
+    if request.method == 'GET':
+        return render_template('lab4/grain.html')
+    
+    # Обработка POST запроса
+    grain_type = request.form.get('grain_type')
+    weight = request.form.get('weight')
+    
+    # Цены за тонну
+    prices = {
+        'barley': 12000,   # ячмень
+        'oats': 8500,      # овёс
+        'wheat': 9000,     # пшеница
+        'rye': 15000       # рожь
+    }
+    
+    # Названия зерна для отображения
+    grain_names = {
+        'barley': 'ячмень',
+        'oats': 'овёс', 
+        'wheat': 'пшеница',
+        'rye': 'рожь'
+    }
+    
+    # Проверка на выбор типа зерна
+    if not grain_type:
+        return render_template('lab4/grain.html', error='Выберите тип зерна')
+    
+    # Проверка веса
+    if not weight:
+        return render_template('lab4/grain.html', error='Введите вес заказа')
+    
+    try:
+        weight_val = float(weight)
+    except ValueError:
+        return render_template('lab4/grain.html', error='Вес должен быть числом')
+    
+    if weight_val <= 0:
+        return render_template('lab4/grain.html', error='Вес должен быть положительным числом')
+    
+    # Проверка наличия больших объемов
+    if weight_val > 100:
+        return render_template('lab4/grain.html', 
+                             error='Извините, такого объёма сейчас нет в наличии')
+    
+    # Расчет стоимости
+    price_per_ton = prices[grain_type]
+    total = weight_val * price_per_ton
+    
+    # Применение скидки
+    discount = 0
+    discount_applied = False
+    
+    if weight_val > 10:
+        discount = total * 0.10  # 10% скидка
+        total -= discount
+        discount_applied = True
+    
+    grain_name = grain_names[grain_type]
+    
+    return render_template('lab4/grain.html',
+                         success=True,
+                         grain_type=grain_name,
+                         weight=weight_val,
+                         total=total,
+                         discount=discount,
+                         discount_applied=discount_applied,
+                         original_total=weight_val * price_per_ton if discount_applied else None)
+
+
