@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block lab %}Пользователи{% endblock %}
+
+{% block main %}
+<h1>Список пользователей</h1>
+
+<div>
+    <a href="/lab4/edit-profile">Редактировать профиль</a>
+</div>
+
+<table border="1" style="width: 100%; margin-top: 20px;">
+    <tr>
+        <th>Имя</th>
+        <th>Логин</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.name }}{% if user.login == current_user.login %} (Вы){% endif %}</td>
+        <td>{{ user.login }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<div style="margin-top: 20px;">
+    <a href="/lab4/register">Добавить пользователя</a>
+</div>
+{% endblock %}

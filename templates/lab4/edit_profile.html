@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block lab %}Редактирование профиля{% endblock %}
+
+{% block main %}
+<h1>Редактирование профиля</h1>
+
+<form method="post">
+    <div>
+        <label>Логин: <input type="text" name="login" value="{{ user.login }}" required></label>
+    </div>
+    <div>
+        <label>Имя: <input type="text" name="name" value="{{ user.name }}" required></label>
+    </div>
+    <div>
+        <label>Новый пароль: <input type="password" name="password"></label>
+    </div>
+    <div>
+        <label>Подтвердите пароль: <input type="password" name="confirm_password"></label>
+    </div>
+    
+    {% if error %}
+    <div style="color: red;">{{ error }}</div>
+    {% endif %}
+    
+    <div>
+        <button type="submit">Сохранить</button>
+        <a href="/lab4/users">Отмена</a>
+    </div>
+</form>
+{% endblock %}
