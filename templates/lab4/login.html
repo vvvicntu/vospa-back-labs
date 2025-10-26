@@ -4,7 +4,7 @@
 
 {% block main %} 
     {% if authorized %}
-        <h1>Добро пожаловать, {{ login }}</h1>
+        <h1>Добро пожаловать, {{ name }}!</h1>
         <div style="text-align: center">
             <form action="/lab4/logout" method="post">
                 <button>Выход</button>
@@ -16,13 +16,17 @@
     <form method="post" style="margin-left: 20px ;">
         <div>
             <label for="login">Пользователь: </label>
-            <input type="text" id="login" name="login">
+            <input type="text" id="login" name="login" value="{{ login_value or '' }}">
         </div>
         <div>
             <label for="password">Пароль: </label>
             <input type="password" id="password" name="password">
         </div><br>
-        <div style="color:crimson">{{ error  }}</div>
+        {% if error %}
+        <div style="width: 170px; color: crimson; font-weight: bold; background-color: #ffe6e6; padding: 10px; border-radius: 5px; border: 1px solid crimson;">
+            {{ error }}
+        </div><br>
+        {% endif %}
         <div>
             <button type="submit">Войти</button>
             <button type="reset">Отмена</button>
