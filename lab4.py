@@ -10,6 +10,7 @@ def lab():
 def div_form():
     return render_template('lab4/div-form.html')
 
+
 @lab4.route('/lab4/div', methods = ['POST'])
 def div():
     x1 = request.form.get('x1') # получение post-данных
@@ -38,6 +39,7 @@ def sum():
     
     result = x1 + x2
     return render_template('lab4/sum.html', x1=x1, x2=x2, result=result)
+
 
 @lab4.route('/lab4/mult', methods = ['POST'])
 def mult():
@@ -112,9 +114,11 @@ users = [
 # Страница регистрации
 @lab4.route('/lab4/register', methods=['GET', 'POST'])
 def register():
+    # Показываем форму регистрации
     if request.method == 'GET':
         return render_template('lab4/register.html')
     
+    # Получаем данные из формы
     login = request.form.get('login')
     password = request.form.get('password')
     confirm_password = request.form.get('confirm_password')
@@ -143,6 +147,7 @@ def register():
     session['login'] = login
     return redirect('/lab4/login')
 
+
 # Страница списка пользователей
 @lab4.route('/lab4/users')
 def users_list():
@@ -156,6 +161,7 @@ def users_list():
     return render_template('lab4/users.html', 
                          users=users, 
                          current_user=current_user)
+
 
 # Редактирование профиля
 @lab4.route('/lab4/edit-profile', methods=['GET', 'POST'])
@@ -205,7 +211,7 @@ def edit_profile():
     
     return redirect('/lab4/users')
 
-# Обновляем функцию login для работы с именами
+
 @lab4.route('/lab4/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
@@ -245,14 +251,11 @@ def logout():
     return redirect('/lab4/login')
 
 
-# lab4.py - исправленная версия для холодильника
-
 @lab4.route('/lab4/fridge', methods=['GET', 'POST'])
 def fridge():
     if request.method == 'GET':
         return render_template('lab4/fridge.html')
     
-    # Обработка POST запроса
     temperature = request.form.get('temperature')
     
     # Проверка на пустое значение
@@ -291,7 +294,6 @@ def grain():
     if request.method == 'GET':
         return render_template('lab4/grain.html')
     
-    # Обработка POST запроса
     grain_type = request.form.get('grain_type')
     weight = request.form.get('weight')
     
@@ -343,7 +345,7 @@ def grain():
     if weight_val > 10:
         discount = total * 0.10  # 10% скидка
         total -= discount
-        discount_applied = True
+        discount_applied = True # Отметка что скидка применена
     
     grain_name = grain_names[grain_type]
     
