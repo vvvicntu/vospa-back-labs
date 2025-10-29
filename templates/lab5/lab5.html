@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 5{% endblock %}
+
+{% block main %}
+    <h1>База знаний</h1>
+    
+    <div class="menu">
+        <a href="/lab5/list">Список статей</a>
+        <a href="/lab5/create">Создать статью</a>
+        <a href="/lab5/login">Войти</a>
+        <a href="/lab5/register">Регистрация</a>
+        <span class="username">{{ login or 'anonymous' }}</span>
+    </div>
+
+    <style>
+        .menu {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f3efff;
+            border-radius: 5px;
+        }
+        
+        .menu a {
+            text-decoration: none;
+            color: #333;
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .username {
+            margin-left: auto;
+            font-weight: bold;
+            color: #000d6d;
+        }
+    </style>
+{% endblock %}
