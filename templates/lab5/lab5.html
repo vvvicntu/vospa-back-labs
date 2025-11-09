@@ -10,7 +10,7 @@
         <a href="/lab5/create">Создать статью</a>
         <a href="/lab5/login">Войти</a>
         <a href="/lab5/register">Регистрация</a>
-        <span class="username">{{ login or 'anonymous' }}</span>
+        <span class="username">{{ session.get('login') or 'anonymous' }}</span>
     </div>
 
     <style>
