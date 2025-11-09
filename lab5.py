@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, request, session, redirect
+from flask import Blueprint, render_template, request, session, redirect, current_app
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from werkzeug.security import generate_password_hash, check_password_hash
+import sqlite3
+from os import path
 
 lab5 = Blueprint('lab5', __name__)
 
@@ -10,13 +12,20 @@ def lab():
     return render_template('lab5/lab5.html', login=session.get('login'))
 
 def db_connect():
-    conn = psycopg2.connect(
-        host = '127.0.0.1',
-        database = 'vika_vosp',
-        user = 'vika_vosp',
-        password = '666'
-    )
-    cur = conn.cursor(cursor_factory = RealDictCursor)
+    if current_app.config['DB_TYPE'] == 'postgres':
+            conn = psycopg2.connect(
+                host = '127.0.0.1',
+                database = 'vika_vosp',
+                user = 'vika_vosp',
+                password = '666'
+            )
+            cur = conn.cursor(cursor_factory = RealDictCursor)
+    else:
+        dir_path = path.dirname(path.realpath(__file__))
+        db_path = path.join(dir_path, "database.db")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory  = sqlite3.Row
+        cur = conn.cursor()
 
     return conn, cur
 
@@ -47,7 +56,7 @@ def register():
                                error = "Такой пользователь уже существует!")
     
     password_hash = generate_password_hash(password)
-    
+
     cur.execute("INSERT INTO users (login, password) VALUES(%s, %s);", (login, password_hash))
     
     db_close(conn, cur)
