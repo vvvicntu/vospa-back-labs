@@ -3,39 +3,107 @@
 {% block lab %}Лабораторная работа 5{% endblock %}
 
 {% block main %}
-    <h1>База знаний</h1>
-    
-    <div class="menu">
-        <a href="/lab5/list">Список статей</a>
-        <a href="/lab5/create">Создать статью</a>
-        <a href="/lab5/login">Войти</a>
-        <a href="/lab5/register">Регистрация</a>
-        <span class="username">{{ session.get('login') or 'anonymous' }}</span>
+    <div class="container">
+        <h1 class="main-title">База знаний</h1>
+        
+        <div class="menu">
+            <a href="/lab5/list" class="menu-link">Список статей</a>
+            <a href="/lab5/create" class="menu-link">Создать статью</a>
+            {% if session.get('login') %}
+                <a href="/lab5/logout" class="menu-link logout">Выйти</a>
+                <span class="username">{{ session['login'] }}</span>
+            {% else %}
+                <a href="/lab5/login" class="menu-link">Войти</a>
+                <a href="/lab5/register" class="menu-link">Регистрация</a>
+                <span class="username">Anonymous</span>
+            {% endif %}
+        </div>
+
+        <div class="welcome">
+            <h2>Добро пожаловать в базу знаний!</h2>
+            <p>Здесь вы можете бла бла бла бла</p>
+        </div>
     </div>
 
     <style>
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .main-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
         .menu {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             align-items: center;
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #f3efff;
-            border-radius: 5px;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         
-        .menu a {
+        .menu-link {
             text-decoration: none;
-            color: #333;
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            color: white;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .menu-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .logout {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .logout:hover {
+            background: rgba(255, 77, 77, 0.3);
         }
         
         .username {
             margin-left: auto;
-            font-weight: bold;
-            color: #000d6d;
+            font-weight: 600;
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
         }
+
+        .welcome {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-top: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .welcome h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        .welcome p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
     </style>
 {% endblock %}
