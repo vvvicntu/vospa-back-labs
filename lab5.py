@@ -36,6 +36,8 @@ def db_close(conn, cur):
     cur.close()
     conn.close()
 
+
+
 @lab5.route('/lab5/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
@@ -43,6 +45,7 @@ def register():
     
     login = request.form.get('login')
     password = request.form.get('password')
+    real_name = request.form.get('real_name')
 
     if not (login or password):
         return render_template('lab5/register.html', error = 'Заполните все поля!')
@@ -62,9 +65,9 @@ def register():
     password_hash = generate_password_hash(password)
 
     if current_app.config['DB_TYPE'] == 'postgres':
-        cur.execute("INSERT INTO users (login, password) VALUES (%s, %s);", (login, password_hash))
+        cur.execute("INSERT INTO users (login, password, real_name) VALUES (%s, %s, %s);", (login, password_hash, real_name))
     else:
-        cur.execute("INSERT INTO users (login, password) VALUES (?, ?);", (login, password_hash))
+        cur.execute("INSERT INTO users (login, password, real_name) VALUES (?, ?, ?);", (login, password_hash, real_name))
     
     db_close(conn, cur)
     return render_template('lab5/success.html', login=login)
@@ -107,6 +110,91 @@ def login():
     db_close(conn, cur)
     return render_template('lab5/success_login.html', login=login)
     
+
+
+@lab5.route('/lab5/users')
+def users_list():
+    conn, cur = db_connect()
+    
+    if current_app.config['DB_TYPE'] == 'postgres':
+        cur.execute("SELECT login, real_name FROM users ORDER BY login;")
+    else:
+        cur.execute("SELECT login, real_name FROM users ORDER BY login;")
+    
+    users = cur.fetchall()
+    db_close(conn, cur)
+    
+    return render_template('lab5/users.html', users=users)
+
+
+
+@lab5.route('/lab5/profile', methods=['GET', 'POST'])
+def profile():
+    login = session.get('login')
+    if not login:
+        return redirect('/lab5/login')
+    
+    conn, cur = db_connect()
+    
+    if request.method == 'GET':
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("SELECT login, real_name FROM users WHERE login=%s;", (login,))
+        else:
+            cur.execute("SELECT login, real_name FROM users WHERE login=?;", (login,))
+        
+        user = cur.fetchone()
+        db_close(conn, cur)
+        return render_template('lab5/profile.html', user=user)
+    
+    # Обработка POST-запроса (изменение данных)
+    real_name = request.form.get('real_name')
+    current_password = request.form.get('current_password')
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+    
+    # Получаем текущего пользователя для проверки пароля
+    if current_app.config['DB_TYPE'] == 'postgres':
+        cur.execute("SELECT * FROM users WHERE login=%s;", (login,))
+    else:
+        cur.execute("SELECT * FROM users WHERE login=?;", (login,))
+    
+    user = cur.fetchone()
+    
+    # Если пользователь хочет сменить пароль
+    if new_password:
+        # Проверяем текущий пароль
+        if not check_password_hash(user['password'], current_password):
+            db_close(conn, cur)
+            return render_template('lab5/profile.html', 
+                                 user=user, 
+                                 error="Текущий пароль неверен")
+        
+        # Проверяем совпадение нового пароля и подтверждения
+        if new_password != confirm_password:
+            db_close(conn, cur)
+            return render_template('lab5/profile.html', 
+                                 user=user, 
+                                 error="Новый пароль и подтверждение не совпадают")
+        
+        # Хешируем новый пароль и обновляем данные
+        new_password_hash = generate_password_hash(new_password)
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("UPDATE users SET real_name=%s, password=%s WHERE login=%s;", 
+                       (real_name, new_password_hash, login))
+        else:
+            cur.execute("UPDATE users SET real_name=?, password=? WHERE login=?;", 
+                       (real_name, new_password_hash, login))
+    else:
+        # Меняем только имя (без смены пароля)
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("UPDATE users SET real_name=%s WHERE login=%s;", (real_name, login))
+        else:
+            cur.execute("UPDATE users SET real_name=? WHERE login=?;", (real_name, login))
+    
+    conn.commit()
+    db_close(conn, cur)
+    return redirect('/lab5/profile')
+
 
 
 @lab5.route('/lab5/logout')
@@ -166,7 +254,7 @@ def create():
 
 
 @lab5.route('/lab5/list')
-def list():
+def list_articles():
     login = session.get('login')
     if not login:
         return redirect('/lab5/login')
@@ -186,22 +274,38 @@ def list():
     
     user_id = user["id"]
 
+    # Избранные статьи выводятся первыми
     if current_app.config['DB_TYPE'] == 'postgres':
-        cur.execute("SELECT * FROM articles WHERE user_id=%s;", (user_id,))
+        cur.execute("SELECT * FROM articles WHERE user_id=%s ORDER BY is_favorite DESC, id DESC;", (user_id,))
     else:
-        cur.execute("SELECT * FROM articles WHERE user_id=?;", (user_id,))
+        cur.execute("SELECT * FROM articles WHERE user_id=? ORDER BY is_favorite DESC, id DESC;", (user_id,))
 
     articles = cur.fetchall()
-
     db_close(conn, cur)
     
-    # Проверка на отсутствие статей
     if not articles:
         return render_template('/lab5/articles.html', 
                              no_articles=True, 
                              message="У вас пока нет ни одной статьи")
     
     return render_template('/lab5/articles.html', articles=articles, no_articles=False)
+
+
+
+@lab5.route('/lab5/public')
+def public_articles():
+    conn, cur = db_connect()
+    
+    # Публичные статьи доступны всем
+    if current_app.config['DB_TYPE'] == 'postgres':
+        cur.execute("SELECT a.*, u.login FROM articles a JOIN users u ON a.user_id = u.id WHERE a.is_public = TRUE ORDER BY a.id DESC;")
+    else:
+        cur.execute("SELECT a.*, u.login FROM articles a JOIN users u ON a.user_id = u.id WHERE a.is_public = 1 ORDER BY a.id DESC;")
+    
+    articles = cur.fetchall()
+    db_close(conn, cur)
+    
+    return render_template('lab5/public_articles.html', articles=articles)
 
 
 
