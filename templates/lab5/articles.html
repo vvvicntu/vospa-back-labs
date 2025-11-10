@@ -4,35 +4,155 @@
 
 {% block main %}
     <h1>Мои статьи</h1>
-
-    {% if no_articles %}
-        <div style="color: red">{{ message }}</div>
+    
+    {% if message %}
+        <div class="message">
+            <p>{{ message }}</p>
+            <a href="/lab5/create" class="create-link">Создать первую статью</a>
+        </div>
     {% else %}
-        {% for article in articles %}
-            <div style="border: 1px solid #ccc; padding: 15px; margin: 10px 0; {% if article['is_favorite'] %}background: #fffaf0; border-left: 4px solid gold;{% endif %}">
-                <h2>
-                    {% if article['is_favorite'] %}★ {% endif %}{{ article['title'] }}
-                </h2>
-                <p>{{ article['article_text'] }}</p>
-                <div>
-                    {% if article['is_favorite'] %}
-                        <span style="color: orange;">★ Избранная</span>
-                    {% endif %}
-                    {% if article['is_public'] %}
-                        <span style="color: green; margin-left: 10px;">Публичная</span>
-                    {% endif %}
+        <div class="articles-list">
+            {% for article in articles %}
+                <div class="article-card">
+                    <h2 class="article-title">{{ article['title'] }}</h2>
+                    
+                    <div class="article-badges">
+                        {% if article['is_favorite'] %}
+                            <span class="badge favorite">Избранная</span>
+                        {% endif %}
+                        {% if article['is_public'] %}
+                            <span class="badge public">Публичная</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="article-content">
+                        {{ article['article_text'] | replace('\n', '<br>') | safe }}
+                    </div>
+                    
+                    <div class="article-actions">
+                        <a href="/lab5/edit/{{ article['id'] }}" class="edit-btn">Редактировать</a>
+                        <form action="/lab5/delete/{{ article['id'] }}" method="post" class="delete-form">
+                            <button type="submit" class="delete-btn" onclick="return confirm('Удалить эту статью?')">Удалить</button>
+                        </form>
+                    </div>
                 </div>
-                <div style="margin-top: 10px;">
-                    <a href="/lab5/edit/{{ article['id'] }}">Редактировать</a>
-                    <a href="/lab5/delete/{{ article['id'] }}" style="margin-left: 10px;" onclick="return confirm('Удалить статью?')">Удалить</a>
-                </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
+        
+        <div class="create-new">
+            <a href="/lab5/create" class="create-link">Создать новую статью</a>
+        </div>
     {% endif %}
 
-    <div style="margin-top: 20px;">
-        <a href="/lab5/create">Создать статью</a> | 
-        <a href="/lab5/public">Публичные статьи</a> | 
-        <a href="/lab5/">На главную</a>
-    </div>
+    <style>
+        .message {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .articles-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .article-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .article-title {
+            color: #333;
+            margin: 0 0 15px 0;
+            font-size: 1.5em;
+        }
+
+        .article-badges {
+            margin-bottom: 15px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+
+        .badge.favorite {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .badge.public {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .article-content {
+            line-height: 1.6;
+            color: #555;
+            margin: 20px 0;
+        }
+
+        .article-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .edit-btn {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+            text-decoration: none;
+            padding: 10px 20px;
+        }
+
+    
+        .delete-btn {
+            background: #ffebee;
+            color: #d32f2f;
+            border: 1px solid #ffcdd2;
+            text-decoration: none;
+            padding: 10px 20px;
+        }
+
+
+        .delete-form {
+            margin: 0;
+        }
+
+        .create-new {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .create-link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+    </style>
 {% endblock %}

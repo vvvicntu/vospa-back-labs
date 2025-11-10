@@ -4,98 +4,74 @@
 
 {% block main %}
     <h1>Редактирование статьи</h1>
-
+    
     {% if error %}
-        <div style="color: red">{{ error }}</div>
+        <div style="color: red; margin: 10px 0;">{{ error }}</div>
     {% endif %}
-
+    
     <form method="post">
         <div>
-            <label>Название статьи:</label><br>
-            <input type="text" name="title" value="{{ article['title'] }}" maxlength="50" style="width: 300px;">
-        </div><br>
-
-        <div>
-            <label>Текст статьи:</label><br>
-            <textarea name="article_text" rows="8" style="width: 500px;">{{ article['article_text'] }}</textarea>
-        </div><br>
-
+            <label>
+                Название статьи:
+                <input type="text" name="title" maxlength="50" value="{{ article['title'] }}" required>
+            </label>
+        </div>
+        
         <div>
             <label>
-                <input type="checkbox" name="is_favorite" value="true" {% if article['is_favorite'] %}checked{% endif %}>
-                Избранная
+                Текст статьи:
+                <textarea name="article_text" rows="10" required>{{ article['article_text'] }}</textarea>
             </label>
-        </div><br>
-
+        </div>
+        
         <div>
             <label>
-                <input type="checkbox" name="is_public" value="true" {% if article['is_public'] %}checked{% endif %}>
-                Публичная
+                <input type="checkbox" name="is_favorite" {% if article['is_favorite'] %}checked{% endif %}>
+                Добавить в избранное
             </label>
-        </div><br>
-
-        <button type="submit">Сохранить</button>
-        <a href="/lab5/list" style="margin-left: 10px;">Отмена</a>
+        </div>
+        
+        <div>
+            <label>
+                <input type="checkbox" name="is_public" {% if article['is_public'] %}checked{% endif %}>
+                Сделать публичной
+            </label>
+        </div>
+        
+        <div>
+            <button type="submit">Сохранить изменения</button>
+            <a href="/lab5/list" style="margin-left: 10px;">Отмена</a>
+        </div>
     </form>
 
-<style>
-.edit-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.error {
-    background: #ffebee;
-    color: #c62828;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    border-left: 4px solid #c62828;
-}
-
-.article-form {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.form-group {
-    margin-bottom: 25px;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #34495e;
-}
-
-input, textarea {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    font-size: 16px;
-    box-sizing: border-box;
-}
-
-.form-actions {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-}
-
-.btn-primary {
-    background: #3498db;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 6px;
-    font-size: 16px;
-    cursor: pointer;
-    text-decoration: none;
-}
-</style>
+    <style>
+        form div {
+            margin: 15px 0;
+        }
+        
+        label {
+            display: block;
+            margin: 10px 0;
+        }
+        
+        input[type="text"] {
+            padding: 5px;
+            width: 300px;
+        }
+        
+        textarea {
+            padding: 5px;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
 {% endblock %}

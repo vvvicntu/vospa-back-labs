@@ -3,10 +3,11 @@
 {% block lab %}Лабораторная работа 5{% endblock %}
 
 {% block main %}
-    <h1>Публичные статьи</h1>
+    <h1>Избранные статьи</h1>
     
     {% if not articles %}
-        <p>Пока нет публичных статей</p>
+        <p>У вас пока нет избранных статей</p>
+        <p><a href="/lab5/create">Создать статью</a> или <a href="/lab5/list">перейти ко всем статьям</a></p>
     {% else %}
         <div class="articles-list">
             {% for article in articles %}
@@ -14,20 +15,18 @@
                     <h2>{{ article['title'] }}</h2>
                     
                     <div class="article-meta">
-                        <strong>Автор:</strong> 
-                        {% if article['real_name'] %}
-                            {{ article['real_name'] }} ({{ article['login'] }})
-                        {% else %}
-                            {{ article['login'] }}
-                        {% endif %}
-                        
-                        {% if article['is_favorite'] %}
-                            <span class="favorite-badge">Избранная автором</span>
+                        <span class="favorite-badge">Избранная</span>
+                        {% if article['is_public'] %}
+                            <span class="public-badge">Публичная</span>
                         {% endif %}
                     </div>
                     
                     <div class="article-content">
                         {{ article['article_text'] | replace('\n', '<br>') | safe }}
+                    </div>
+                    
+                    <div class="article-actions">
+                        <a href="/lab5/edit/{{ article['id'] }}">Редактировать</a>
                     </div>
                 </div>
             {% endfor %}
@@ -44,7 +43,7 @@
             border-radius: 8px;
             padding: 20px;
             margin: 15px 0;
-            background-color: #e8f5e8;
+            background-color: #fff9e6;
         }
         
         .article-card h2 {
@@ -53,23 +52,35 @@
         }
         
         .article-meta {
-            color: #666;
-            font-size: 0.9em;
             margin-bottom: 10px;
         }
         
-        .favorite-badge {
+        .favorite-badge, .public-badge {
             background-color: #ffeb3b;
             padding: 4px 8px;
             border-radius: 12px;
             font-size: 0.8em;
             color: #333;
-            margin-left: 10px;
+            margin-right: 5px;
+        }
+        
+        .public-badge {
+            background-color: #4CAF50;
+            color: white;
         }
         
         .article-content {
             line-height: 1.6;
             margin: 15px 0;
+        }
+        
+        .article-actions {
+            margin-top: 10px;
+        }
+        
+        .article-actions a {
+            color: #2196F3;
+            text-decoration: none;
         }
     </style>
 {% endblock %}
