@@ -8,6 +8,7 @@ from os import path
 lab5 = Blueprint('lab5', __name__)
 
 def db_connect():
+    # Подключение к postgres
     if current_app.config['DB_TYPE'] == 'postgres':
         conn = psycopg2.connect(
             host='127.0.0.1',
@@ -17,6 +18,7 @@ def db_connect():
         )
         cur = conn.cursor(cursor_factory=RealDictCursor)
     else:
+        # Подключение к SQLite
         dir_path = path.dirname(path.realpath(__file__))
         db_path = path.join(dir_path, "database.db")
         conn = sqlite3.connect(db_path)
@@ -34,8 +36,10 @@ def db_close(conn, cur):
 def lab():
     return render_template('lab5/lab5.html', login=session.get('login'))
 
+
 @lab5.route('/lab5/register', methods=['GET', 'POST'])
 def register():
+    # проверяет существование ключа в сессии
     if 'login' in session:
         return render_template('lab5/register.html', login=session['login'], message='Вы не можете зарегистрироваться, находясь в аккаунте. Хотите выйти?')
 
@@ -51,6 +55,7 @@ def register():
         
     conn, cur = db_connect()
     
+    # sql-инъекция
     if current_app.config['DB_TYPE'] == 'postgres':
         cur.execute("SELECT login FROM users WHERE login=%s;", (login,))
     else:
@@ -62,6 +67,7 @@ def register():
 
     password_hash = generate_password_hash(password)
     
+    # добавление пользователя
     if current_app.config['DB_TYPE'] == 'postgres':
         cur.execute("INSERT INTO users(login, password, real_name) VALUES (%s, %s, %s);", (login, password_hash, real_name))
     else:
@@ -69,6 +75,7 @@ def register():
 
     db_close(conn, cur)
     return render_template('lab5/success.html', login=login)
+
 
 @lab5.route('/lab5/login', methods=['GET', 'POST'])
 def login():
@@ -86,12 +93,15 @@ def login():
 
     conn, cur = db_connect()
 
+    # поиск пользователя в базе
     if current_app.config['DB_TYPE'] == 'postgres':
         cur.execute("SELECT * FROM users WHERE login=%s;", (login,))
     else:
         cur.execute("SELECT * FROM users WHERE login=?;", (login,))
+    # вернется одна строка  с параметрами 
     user = cur.fetchone()
 
+    # если пользователь не найден в базе
     if not user:
         db_close(conn, cur)
         return render_template('lab5/login.html', error='Логин и/или пароль неверны')
@@ -103,6 +113,7 @@ def login():
     session['login'] = login
     db_close(conn, cur)
     return render_template('lab5/success_login.html', login=login)
+
 
 @lab5.route('/lab5/create', methods=['GET', 'POST'])
 def create():
@@ -149,9 +160,12 @@ def create():
     db_close(conn, cur)
     return redirect('/lab5/')
 
+
 @lab5.route('/lab5/list')
 def list():
+
     login = session.get('login')
+
     if not login:
         return redirect('/lab5/login')
 
@@ -167,6 +181,7 @@ def list():
         db_close(conn, cur)
         return redirect('/lab5/login')
     
+    # получение ID пользователя
     user_id = user["id"]
 
     if current_app.config['DB_TYPE'] == 'postgres':
@@ -180,6 +195,7 @@ def list():
 
     db_close(conn, cur)
     return render_template('lab5/articles.html', articles=articles, login=login)
+
 
 @lab5.route('/lab5/edit/<int:article_id>', methods=['GET', 'POST'])
 def edit(article_id):
@@ -217,7 +233,7 @@ def edit(article_id):
 
     title = request.form.get('title')
     article_text = request.form.get('article_text')
-    is_favorite = request.form.get('is_favorite', 'off') == 'on'
+    is_favorite = request.form.get('is_favorite', 'off') == 'on' # чекбокс
     is_public = request.form.get('is_public', 'off') == 'on'
 
     if not title or not article_text:
@@ -236,6 +252,7 @@ def edit(article_id):
 
     db_close(conn, cur)
     return redirect('/lab5/list')
+
 
 @lab5.route('/lab5/delete/<int:article_id>', methods=['POST'])
 def delete(article_id):
@@ -264,6 +281,7 @@ def delete(article_id):
 
     db_close(conn, cur)
     return redirect('/lab5/list')
+
 
 @lab5.route('/lab5/favorite_articles')
 def favorite_articles():
@@ -294,6 +312,7 @@ def favorite_articles():
     db_close(conn, cur)
     return render_template('lab5/favorite_articles.html', articles=favorite_articles, login=login)
 
+
 @lab5.route('/lab5/public_articles')
 def public_articles():
     conn, cur = db_connect()
@@ -307,10 +326,12 @@ def public_articles():
     db_close(conn, cur)
     return render_template('lab5/public_articles.html', articles=public_articles, login=session.get('login'))
 
+
 @lab5.route('/lab5/logout')
 def logout():
     session.pop('login', None)
     return redirect('/lab5/login')
+
 
 @lab5.route('/lab5/users')
 def users():
@@ -325,6 +346,7 @@ def users():
 
     db_close(conn, cur)
     return render_template('lab5/users.html', users=users, login=login)
+
 
 @lab5.route('/lab5/profile', methods=['GET', 'POST'])
 def profile():
@@ -365,12 +387,14 @@ def profile():
             db_close(conn, cur)
             return render_template('lab5/profile.html', user=user, error="Новый пароль и подтверждение не совпадают", login=login)
         
+        #  в GET мы взяли только login, real_name, а теперь нужен пароль для проверки
         new_password_hash = generate_password_hash(new_password)
         if current_app.config['DB_TYPE'] == 'postgres':
             cur.execute("UPDATE users SET real_name=%s, password=%s WHERE login=%s;", (real_name, new_password_hash, login))
         else:
             cur.execute("UPDATE users SET real_name=?, password=? WHERE login=?;", (real_name, new_password_hash, login))
     else:
+        # если новый пароль не введён то обновляем только real_name
         if current_app.config['DB_TYPE'] == 'postgres':
             cur.execute("UPDATE users SET real_name=%s WHERE login=%s;", (real_name, login))
         else:
