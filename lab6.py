@@ -16,6 +16,7 @@ def main():
 def api():
     data = request.json
     id = data['id']
+    
     if data['method'] == 'info':
         return {
             'jsonrpc': '2.0',
@@ -31,7 +32,7 @@ def api():
                 'code': 1,
                 'message': 'Unauthorized'
             },
-            'id' : id
+            'id': id
         }
 
     if data['method'] == 'booking':
@@ -43,23 +44,47 @@ def api():
                         'jsonrpc': '2.0',
                         'error': {
                             'code': 2,
-                            'message': 'alredy booked'
+                            'message': 'already booked'
                         },
-                        'id' : id
+                        'id': id
                     }
                 office['tenant'] = login  
-                return { 
+                return {
                     'jsonrpc': '2.0',
                     'result': 'success',
-                    'id' : id
+                    'id': id
+                }
+    
+    if data['method'] == 'cancellation':
+        office_number = data['params']
+        for office in offices:
+            if office['number'] == office_number:
+                if office['tenant'] == '':  # офис не арендован
+                    return {
+                        'jsonrpc': '2.0',
+                        'error': {
+                            'code': 3,
+                            'message': 'Office is not booked'
+                        },
+                        'id': id
+                    }
+                if office['tenant'] != login:  # офис арендован другим пользователем
+                    return {
+                        'jsonrpc': '2.0',
+                        'error': {
+                            'code': 4,
+                            'message': 'You can only cancel your own booking'
+                        },
+                        'id': id
+                    }
+                # Снимаем аренду
+                office['tenant'] = ''  
+                return {
+                    'jsonrpc': '2.0',
+                    'result': 'cancellation success',
+                    'id': id
                 }
         
-    elif data['method'] == 'info':
-        return {
-            'jsonrpc': '2.0',
-            'result': offices,
-            'id': id
-        }
     return {
         'jsonrpc': '2.0',  
         'error': {
