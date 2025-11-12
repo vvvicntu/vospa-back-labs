@@ -2,6 +2,72 @@
 
 {% block lab %}Лабораторная работа 6{% endblock %}
 
+{% block head %}
+<style>
+.office-list {
+    list-style: none;
+    padding: 0;
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+.office-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+.office-info {
+    margin-bottom: 10px;
+}
+
+.office-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.but {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    color: white;
+}
+
+.but-book {
+    background: #28a745;
+}
+
+.but-book:hover {
+    background: #218838;
+}
+
+.but-cancel {
+    background: #dc3545;
+}
+
+.but-cancel:hover {
+    background: #c82333;
+}
+
+.but:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.total-price {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 15px;
+    border: 1px solid #28a745;
+    background: #f8fff9;
+    border-radius: 5px;
+}
+</style>
+{% endblock %}
+
 {% block script %}
 <script>
 function getOfficeList() {
@@ -11,6 +77,7 @@ function getOfficeList() {
         'method': 'info',
         'id': Math.round(Math.random()*1000)
     };
+    
     fetch(url, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -26,38 +93,41 @@ function getOfficeList() {
         ul.innerHTML = '';
         
         let totalPrice = 0;
-        let login = '{{ session.get("login", "") }}'; // предполагая, что login передается в шаблон
+        let login = '{{ session.get("login", "") }}';
         
         for (let i = 0; i < office_list.length; i++) {
             const office = office_list[i];
             const li = document.createElement('li');
+            li.className = 'office-item';
             
-            // Отображаем номер офиса, арендатора и стоимость
-            li.innerText = `Офис ${office.number}: ${office.tenant || 'свободен'} - ${office.price} руб./мес.`;
-
-            const bookingButton = document.createElement('button');
-            bookingButton.innerText = 'забронировать';
-            bookingButton.onclick = function() { booking(office.number); };
-            li.appendChild(bookingButton);
-
-            const cancelButton = document.createElement('button');
-            cancelButton.innerText = 'освободить';
-            cancelButton.onclick = function() { cancellation(office.number); };
-            li.appendChild(cancelButton);
+            const isOccupied = office.tenant !== '';
+            const isMyOffice = office.tenant === login;
+            
+            li.innerHTML = `
+                <div class="office-info">
+                    <b>Офис ${office.number}</b>: ${office.tenant || 'свободен'} - ${office.price} руб./мес.
+                </div>
+                <div class="office-buttons">
+                    <button class="but but-book" onclick="booking(${office.number})" ${isOccupied ? 'disabled' : ''}>
+                        Забронировать
+                    </button>
+                    <button class="but but-cancel" onclick="cancellation(${office.number})" ${!isMyOffice ? 'disabled' : ''}>
+                        Освободить
+                    </button>
+                </div>
+            `;
 
             ul.appendChild(li);
             
-            // Считаем общую стоимость для текущего пользователя
-            if (office.tenant === login) {
+            if (isMyOffice) {
                 totalPrice += office.price;
             }
         }
         
-        // Отображаем общую стоимость
         if (totalPrice > 0) {
-            totalDiv.innerHTML = `<h3>Общая стоимость вашей аренды: ${totalPrice} руб./мес.</h3>`;
+            totalDiv.innerHTML = `<b>Общая стоимость аренды: ${totalPrice} руб./мес.</b>`;
         } else {
-            totalDiv.innerHTML = '<h3>У вас нет арендованных офисов</h3>';
+            totalDiv.innerHTML = '<em>У вас нет арендованных офисов</em>';
         }
     });
 }
@@ -70,6 +140,7 @@ function booking(officeNumber) {
         'params': officeNumber,
         'id': Math.round(Math.random()*1000)
     };
+    
     fetch(url, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -87,15 +158,11 @@ function booking(officeNumber) {
                 case 2: 
                     alert('Офис уже забронирован');
                     break;
-                case -32601: 
-                    alert('Произошла ошибка');
-                    break;
                 default:
-                    alert('Неизвестная ошибка');
+                    alert('Ошибка');
                     break;
             }
         } else {
-            document.getElementById('office-list').innerHTML = '';
             getOfficeList();
         }
     });
@@ -109,6 +176,7 @@ function cancellation(officeNumber) {
         'params': officeNumber,
         'id': Math.round(Math.random()*1000)
     };
+    
     fetch(url, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -129,15 +197,11 @@ function cancellation(officeNumber) {
                 case 4: 
                     alert('Вы можете освобождать только свои офисы');
                     break;
-                case -32601: 
-                    alert('Произошла ошибка');
-                    break;
                 default:
-                    alert('Неизвестная ошибка');
+                    alert('Ошибка');
                     break;
             }
         } else {
-            document.getElementById('office-list').innerHTML = '';
             getOfficeList();
         }
     });
@@ -147,10 +211,10 @@ document.addEventListener('DOMContentLoaded', function() {
     getOfficeList();
 });
 </script>
-{% endblock %} 
+{% endblock %}
 
 {% block main %}
-    <h1>Список кабинетов</h1>
+    <h1>Список офисов</h1>
     <ul id="office-list"></ul>
     <div id="total-price"></div>
 {% endblock %}
