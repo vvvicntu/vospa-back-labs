@@ -8,9 +8,9 @@
     <div class="users-list">
         {% for user in users %}
             <div class="user-card">
-                <strong>Логин:</strong> {{ user['login'] }}
+                <b>Логин:</b> {{ user['login'] }}
                 {% if user['real_name'] %}
-                    <br><strong>Имя:</strong> {{ user['real_name'] }}
+                    <br><b>Имя:</b> {{ user['real_name'] }}
                 {% endif %}
             </div>
         {% endfor %}
