@@ -7,7 +7,7 @@
 .office-list {
     list-style: none;
     padding: 0;
-    max-width: 600px;
+    max-width: 700px;
     margin: 20px auto;
 }
 
@@ -15,12 +15,36 @@
     border: 1px solid #ddd;
     padding: 15px;
     margin-bottom: 10px;
-    border-radius: 5px;
+    border-radius: 8px;
     background: #f9f9f9;
+    transition: all 0.3s ease;
+}
+
+.office-item:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .office-info {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.office-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+.status-free {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-occupied {
+    background: #f8d7da;
+    color: #721c24;
 }
 
 .office-buttons {
@@ -29,18 +53,20 @@
 }
 
 .but {
-    padding: 8px 15px;
+    padding: 8px 16px;
     border: none;
-    border-radius: 3px;
+    border-radius: 4px;
     cursor: pointer;
     color: white;
+    font-size: 14px;
+    transition: background-color 0.3s;
 }
 
 .but-book {
     background: #28a745;
 }
 
-.but-book:hover {
+.but-book:hover:not(:disabled) {
     background: #218838;
 }
 
@@ -48,28 +74,48 @@
     background: #dc3545;
 }
 
-.but-cancel:hover {
+.but-cancel:hover:not(:disabled) {
     background: #c82333;
 }
 
 .but:disabled {
     background: #6c757d;
     cursor: not-allowed;
+    opacity: 0.6;
 }
 
 .total-price {
-    max-width: 600px;
-    margin: 20px auto;
-    padding: 15px;
-    border: 1px solid #28a745;
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 20px;
+    border: 2px solid #28a745;
     background: #f8fff9;
-    border-radius: 5px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.loading {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+    text-align: center;
 }
 </style>
 {% endblock %}
 
 {% block script %}
 <script>
+let currentLogin = '{{ session.get("login", "") }}';
+
 function getOfficeList() {
     const url = '/lab6/json-rpc-api/';
     const json = {
@@ -77,6 +123,9 @@ function getOfficeList() {
         'method': 'info',
         'id': Math.round(Math.random()*1000)
     };
+    
+    const ul = document.getElementById('office-list');
+    ul.innerHTML = '<div class="loading">Загрузка списка офисов...</div>';
     
     fetch(url, {
         method: 'POST',
@@ -87,45 +136,67 @@ function getOfficeList() {
         return response.json();
     })
     .then(function(data){
+        if (data.error) {
+            showError('Ошибка загрузки данных: ' + data.error.message);
+            return;
+        }
+        
         const office_list = data.result;
         const ul = document.getElementById('office-list');
-        const totalDiv = document.getElementById('total-price');
         ul.innerHTML = '';
-        
-        let totalPrice = 0;
-        let login = '{{ session.get("login", "") }}';
         
         for (let i = 0; i < office_list.length; i++) {
             const office = office_list[i];
             const li = document.createElement('li');
             li.className = 'office-item';
             
-            const isOccupied = office.tenant !== '';
-            const isMyOffice = office.tenant === login;
+            const isOccupied = office.tenant && office.tenant !== '';
+            const isMyOffice = office.tenant === currentLogin;
             
             li.innerHTML = `
                 <div class="office-info">
                     <b>Офис ${office.number}</b>: ${office.tenant || 'свободен'} - ${office.price} руб./мес.
                 </div>
                 <div class="office-buttons">
-                    <button class="but but-book" onclick="booking(${office.number})" ${isOccupied ? 'disabled' : ''}>
+                    <button class="but but-book" onclick="booking('${office.number}')" ${isOccupied ? 'disabled' : ''}>
                         Забронировать
                     </button>
-                    <button class="but but-cancel" onclick="cancellation(${office.number})" ${!isMyOffice ? 'disabled' : ''}>
+                    <button class="but but-cancel" onclick="cancellation('${office.number}')" ${!isMyOffice ? 'disabled' : ''}>
                         Освободить
                     </button>
                 </div>
             `;
 
             ul.appendChild(li);
-            
-            if (isMyOffice) {
-                totalPrice += office.price;
-            }
         }
         
-        if (totalPrice > 0) {
-            totalDiv.innerHTML = `<b>Общая стоимость аренды: ${totalPrice} руб./мес.</b>`;
+        updateTotalCost();
+    })
+    .catch(function(error) {
+        showError('Ошибка соединения: ' + error.message);
+    });
+}
+
+function updateTotalCost() {
+    const url = '/lab6/json-rpc-api/';
+    const json = {
+        'jsonrpc': '2.0',
+        'method': 'total_cost',
+        'id': Math.round(Math.random()*1000)
+    };
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(json)
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        const totalDiv = document.getElementById('total-price');
+        if (data.result > 0) {
+            totalDiv.innerHTML = `<b>Общая стоимость аренды: ${data.result} руб./мес.</b>`;
         } else {
             totalDiv.innerHTML = '<em>У вас нет арендованных офисов</em>';
         }
@@ -137,7 +208,7 @@ function booking(officeNumber) {
     const json = {
         'jsonrpc': '2.0',
         'method': 'booking',
-        'params': officeNumber,
+        'params': officeNumber,  // Уже передается как строка
         'id': Math.round(Math.random()*1000)
     };
     
@@ -159,7 +230,7 @@ function booking(officeNumber) {
                     alert('Офис уже забронирован');
                     break;
                 default:
-                    alert('Ошибка');
+                    alert('Ошибка: ' + data.error.message);
                     break;
             }
         } else {
@@ -173,7 +244,7 @@ function cancellation(officeNumber) {
     const json = {
         'jsonrpc': '2.0',
         'method': 'cancellation',
-        'params': officeNumber,
+        'params': officeNumber,  // Уже передается как строка
         'id': Math.round(Math.random()*1000)
     };
     
@@ -198,13 +269,18 @@ function cancellation(officeNumber) {
                     alert('Вы можете освобождать только свои офисы');
                     break;
                 default:
-                    alert('Ошибка');
+                    alert('Ошибка: ' + data.error.message);
                     break;
             }
         } else {
             getOfficeList();
         }
     });
+}
+
+function showError(message) {
+    const ul = document.getElementById('office-list');
+    ul.innerHTML = `<div class="error-message">${message}</div>`;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -214,7 +290,14 @@ document.addEventListener('DOMContentLoaded', function() {
 {% endblock %}
 
 {% block main %}
-    <h1>Список офисов</h1>
-    <ul id="office-list"></ul>
-    <div id="total-price"></div>
+    <h1>Аренда офисов</h1>
+    <p style="text-align: center; color: #666;">Система бронирования офисных помещений</p>
+    
+    <div id="office-list">
+        <div class="loading">Загрузка списка офисов...</div>
+    </div>
+    
+    <div id="total-price">
+        <div class="loading">Расчет стоимости...</div>
+    </div>
 {% endblock %}
