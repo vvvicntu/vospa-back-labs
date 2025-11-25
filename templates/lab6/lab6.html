@@ -114,27 +114,36 @@
 
 {% block script %}
 <script>
+// инициализация переменной текущего пользователя
 let currentLogin = '{{ session.get("login", "") }}';
 
 function getOfficeList() {
     const url = '/lab6/json-rpc-api/';
+
+    // структура запроса
     const json = {
         'jsonrpc': '2.0',
         'method': 'info',
         'id': Math.round(Math.random()*1000)
     };
-    
+
+    // подготовка ul перед запросом
     const ul = document.getElementById('office-list');
     ul.innerHTML = '<div class="loading">Загрузка списка офисов...</div>';
     
+    // отправка запроса на сервер
     fetch(url, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(json)  
+        body: JSON.stringify(json) // преобразуем JavaScript объект в JSON строку  
     })
+
+    // обработка ответа от сервера
     .then(function(response) {
         return response.json();
     })
+
+    // обработка данных
     .then(function(data){
         if (data.error) {
             showError('Ошибка загрузки данных: ' + data.error.message);
@@ -143,16 +152,18 @@ function getOfficeList() {
         
         const office_list = data.result;
         const ul = document.getElementById('office-list');
-        ul.innerHTML = '';
+        ul.innerHTML = ''; 
         
+        // создание элементов списка офисов
         for (let i = 0; i < office_list.length; i++) {
             const office = office_list[i];
             const li = document.createElement('li');
             li.className = 'office-item';
             
-            const isOccupied = office.tenant && office.tenant !== '';
-            const isMyOffice = office.tenant === currentLogin;
+            const isOccupied = office.tenant && office.tenant !== ''; // занят ли офис
+            const isMyOffice = office.tenant === currentLogin; // мой ли офис
             
+            // генерация HTML для каждого офиса
             li.innerHTML = `
                 <div class="office-info">
                     <b>Офис ${office.number}</b>: ${office.tenant || 'свободен'} - ${office.price} руб./мес.
@@ -166,10 +177,11 @@ function getOfficeList() {
                     </button>
                 </div>
             `;
-
+            // добавление элемента в список
             ul.appendChild(li);
         }
-        
+
+        // отдельный запрос к API для получения суммы
         updateTotalCost();
     })
     .catch(function(error) {
@@ -177,6 +189,7 @@ function getOfficeList() {
     });
 }
 
+// отображение общей стоимости арендованных офисов
 function updateTotalCost() {
     const url = '/lab6/json-rpc-api/';
     const json = {
@@ -185,14 +198,18 @@ function updateTotalCost() {
         'id': Math.round(Math.random()*1000)
     };
     
+    // отправка запроса
     fetch(url, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(json)
     })
+
+    // преобразование ответа 
     .then(function(response) {
         return response.json();
     })
+
     .then(function(data) {
         const totalDiv = document.getElementById('total-price');
         if (data.result > 0) {
@@ -203,23 +220,30 @@ function updateTotalCost() {
     });
 }
 
+// функция вызывается из HTML кнопки
 function booking(officeNumber) {
+    // подготовка
     const url = '/lab6/json-rpc-api/';
     const json = {
         'jsonrpc': '2.0',
         'method': 'booking',
-        'params': officeNumber,  // Уже передается как строка
+        'params': officeNumber,  
         'id': Math.round(Math.random()*1000)
     };
     
+    // отправка запроса
     fetch(url, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(json)
     })
+
+    // обработка 
     .then(function(response) {
         return response.json();
     })
+
+    // анализ результата
     .then(function(data) {
         if (data.error) {
             switch(data.error.code) {
@@ -278,6 +302,7 @@ function cancellation(officeNumber) {
     });
 }
 
+// заменяет содержимое списка офисов на сообщение об ошибке
 function showError(message) {
     const ul = document.getElementById('office-list');
     ul.innerHTML = `<div class="error-message">${message}</div>`;

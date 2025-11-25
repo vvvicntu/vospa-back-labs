@@ -45,22 +45,23 @@ def api():
 
     try:
         if method == 'info':
-            cur.execute("SELECT * FROM offices ORDER BY number;")
+            cur.execute("SELECT * FROM offices ORDER BY number::integer;")
             offices = cur.fetchall()
             
+            # получаем значения
             offices_data = []
             for office in offices:
                 offices_data.append({
                     "number": office["number"], 
-                    "tenant": office["tenant"] if office["tenant"] else "", 
+                    "tenant": office["tenant"] if office["tenant"] else "", #JavaScript проще обрабатывать "" чем null
                     "price": office["price"]
                 })
             
             db_close(conn, cur)
             return {
-                'jsonrpc': '2.0',
-                'result': offices_data,
-                'id': request_id
+                'jsonrpc': '2.0', # версия протокола
+                'result': offices_data, 
+                'id': request_id # копия ID из запроса для сопоставления
             }
 
         login = session.get('login')
@@ -72,7 +73,7 @@ def api():
                     'code': 1,
                     'message': 'Unauthorized'
                 },
-                'id': request_id
+                'id': request_id # должен совпадать с ID запроса
             }
 
         if method == 'total_cost':
@@ -88,11 +89,12 @@ def api():
             }
 
         if method == 'booking':
-            # Преобразуем номер офиса в строку
+            # преобразуем номер офиса в строку
             office_number = str(data['params'])
             cur.execute("SELECT * FROM offices WHERE number = %s;", (office_number,))
             office = cur.fetchone()
 
+            # проверка существования офиса
             if not office:
                 db_close(conn, cur)
                 return {
@@ -103,7 +105,7 @@ def api():
                     },
                     'id': request_id
                 }
-
+            # проверка доступности офиса
             if office["tenant"]:
                 db_close(conn, cur)
                 return {
@@ -115,6 +117,7 @@ def api():
                     'id': request_id
                 }
 
+            # устанавливаем арендатора
             cur.execute("UPDATE offices SET tenant = %s WHERE number = %s;", (login, office_number))
             db_close(conn, cur)
 
@@ -141,16 +144,6 @@ def api():
                     'id': request_id
                 }
 
-            if not office["tenant"]:
-                db_close(conn, cur)
-                return {
-                    'jsonrpc': '2.0',
-                    'error': {
-                        'code': 3,
-                        'message': 'Not booked'
-                    },
-                    'id': request_id
-                }
 
             if office["tenant"] != login:
                 db_close(conn, cur)
@@ -163,6 +156,7 @@ def api():
                     'id': request_id
                 }
 
+            # выполнение отмены бронирования
             cur.execute("UPDATE offices SET tenant = NULL WHERE number = %s;", (office_number,))
             db_close(conn, cur)
 
