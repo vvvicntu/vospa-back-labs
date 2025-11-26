@@ -2,117 +2,114 @@
 
 {% block lab %}Лабораторная работа 6{% endblock %}
 
-{% block head %}
-<style>
-.office-list {
-    list-style: none;
-    padding: 0;
-    max-width: 700px;
-    margin: 20px auto;
-}
-
-.office-item {
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    background: #f9f9f9;
-    transition: all 0.3s ease;
-}
-
-.office-item:hover {
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.office-info {
-    margin-bottom: 12px;
-    font-size: 16px;
-}
-
-.office-status {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 14px;
-    margin-left: 10px;
-}
-
-.status-free {
-    background: #d4edda;
-    color: #155724;
-}
-
-.status-occupied {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.office-buttons {
-    display: flex;
-    gap: 10px;
-}
-
-.but {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    color: white;
-    font-size: 14px;
-    transition: background-color 0.3s;
-}
-
-.but-book {
-    background: #28a745;
-}
-
-.but-book:hover:not(:disabled) {
-    background: #218838;
-}
-
-.but-cancel {
-    background: #dc3545;
-}
-
-.but-cancel:hover:not(:disabled) {
-    background: #c82333;
-}
-
-.but:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.total-price {
-    max-width: 700px;
-    margin: 30px auto;
-    padding: 20px;
-    border: 2px solid #28a745;
-    background: #f8fff9;
-    border-radius: 8px;
-    text-align: center;
-    font-size: 18px;
-}
-
-.loading {
-    text-align: center;
-    color: #6c757d;
-    font-style: italic;
-}
-
-.error-message {
-    background: #f8d7da;
-    color: #721c24;
-    padding: 10px;
-    border-radius: 4px;
-    margin: 10px 0;
-    text-align: center;
-}
-</style>
-{% endblock %}
-
 {% block script %}
+    <style>
+    .office-list {
+        list-style: none;
+        padding: 0;
+        max-width: 700px;
+        margin: 20px auto;
+    }
+
+    .office-item {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background: #f9f9f9;
+        transition: all 0.3s ease;
+    }
+
+    .office-item:hover {
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .office-info {
+        margin-bottom: 12px;
+        font-size: 16px;
+    }
+
+    .office-status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-left: 10px;
+    }
+
+    .status-free {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-occupied {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .office-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .but {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        color: white;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+
+    .but-book {
+        background: #28a745;
+    }
+
+    .but-book:hover:not(:disabled) {
+        background: #218838;
+    }
+
+    .but-cancel {
+        background: #dc3545;
+    }
+
+    .but-cancel:hover:not(:disabled) {
+        background: #c82333;
+    }
+
+    .but:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .total-price {
+        max-width: 700px;
+        margin: 30px auto;
+        padding: 20px;
+        border: 2px solid #28a745;
+        background: #f8fff9;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 18px;
+    }
+
+    .loading {
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    .error-message {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+        text-align: center;
+    }
+    </style>
 <script>
 // инициализация переменной текущего пользователя
 let currentLogin = '{{ session.get("login", "") }}';
@@ -268,7 +265,7 @@ function cancellation(officeNumber) {
     const json = {
         'jsonrpc': '2.0',
         'method': 'cancellation',
-        'params': officeNumber,  // Уже передается как строка
+        'params': officeNumber,  
         'id': Math.round(Math.random()*1000)
     };
     

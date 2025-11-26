@@ -91,6 +91,7 @@ def api():
         if method == 'booking':
             # преобразуем номер офиса в строку
             office_number = str(data['params'])
+            # находит офис по номеру
             cur.execute("SELECT * FROM offices WHERE number = %s;", (office_number,))
             office = cur.fetchone()
 
