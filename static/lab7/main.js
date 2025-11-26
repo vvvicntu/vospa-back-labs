@@ -1,3 +1,4 @@
+// Функция заполнения таблицы фильмов
 function fillFilmList() {
     fetch('/lab7/rest-api/films/')
         .then(function (data) {
@@ -48,6 +49,7 @@ function fillFilmList() {
         });
 }
 
+// Функция удаления фильма
 function deleteFilm(id, title) {
     if(!confirm(`Вы точно хотите удалить фильм "${title}"?`)) {
         return;
@@ -57,4 +59,55 @@ function deleteFilm(id, title) {
         .then(function () {
             fillFilmList();
         });
+}
+
+// Функции для работы с модальным окном
+function showModal() {
+    document.querySelector('div.modal').style.display = 'block';
+}
+
+function hideModal() {
+    document.querySelector('div.modal').style.display = 'none';
+}
+
+function cancel() {
+    hideModal();
+}
+
+// Функция добавления фильма
+function addFilm() {
+    // Очистка полей формы
+    document.getElementById('id').value = "";
+    document.getElementById('title').value = "";
+    document.getElementById('title-ru').value = "";
+    document.getElementById('year').value = "";
+    document.getElementById('description').value = "";
+    
+    // Показ модального окна
+    showModal();
+}
+
+// Функция отправки фильма на сервер
+function sendFilm() {
+    // Получение данных из формы
+    const film = {
+        title: document.getElementById('title').value,
+        title_ru: document.getElementById('title-ru').value,
+        year: document.getElementById('year').value,
+        description: document.getElementById('description').value
+    };
+
+    const url = `/lab7/rest-api/films`;
+    const method = 'POST';
+
+    fetch(url, {
+        method: method,
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(film)
+    })
+    .then(function() {
+        fillFilmList();
+        hideModal();
+    });
+
 }
