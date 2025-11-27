@@ -30,7 +30,7 @@ function fillFilmList() {
                 let delButton = document.createElement('button');
                 delButton.innerText = 'удалить';
                 delButton.onclick = function() {
-                    deleteFilm(i, films[i].title_ru);
+                    deleteFilm(i);
                 };
 
                 // Добавляем кнопки в ячейку действий
@@ -50,8 +50,8 @@ function fillFilmList() {
 }
 
 // Функция удаления фильма
-function deleteFilm(id, title) {
-    if(!confirm(`Вы точно хотите удалить фильм "${title}"?`)) {
+function deleteFilm(id) {
+    if(!confirm('Вы точно хотите удалить фильм?')) {
         return;
     }
 
@@ -97,17 +97,13 @@ function sendFilm() {
         description: document.getElementById('description').value
     };
 
-    const url = `/lab7/rest-api/films`;
-    const method = 'POST';
-
-    fetch(url, {
-        method: method,
-        headers: {"Content-Type": "application/json"},
+    fetch('/lab7/rest-api/films/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(film)
     })
     .then(function() {
         fillFilmList();
         hideModal();
     });
-
 }

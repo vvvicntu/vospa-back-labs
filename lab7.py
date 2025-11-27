@@ -1,10 +1,6 @@
-from flask import Blueprint, render_template, request, session, current_app, abort
+from flask import Blueprint, render_template, request, abort, jsonify
 
 lab7 = Blueprint('lab7', __name__)
-
-@lab7.route('/lab7/')
-def main():
-    return render_template('lab7/index.html')
 
 films = [
     {
@@ -37,7 +33,6 @@ films = [
         живую цепь, что приводит к ужасающим физическим и психологическим мучениям. \
         Фильм стал одним из самых противоречивых и шокирующих в истории жанра ужасов."
     },
-
     {
         "title": "Green Elephant",
         "title_ru": "Зеленый слоник",
@@ -47,7 +42,6 @@ films = [
         оказываются в замкнутом пространстве, где сталкиваются с безумием, \
         жестокостью и абсурдом системы."
     },
-
     {
         "title": "Alice in Wonderland",
         "title_ru": "Алиса в стране чудес с Аней Пересильд",
@@ -56,17 +50,21 @@ films = [
     }
 ]
 
+@lab7.route('/lab7/')
+def main():
+    return render_template('lab7/index.html')
+
+# Получение всех фильмов
 @lab7.route('/lab7/rest-api/films/', methods=['GET'])
 def get_films():
-    return films
+    return jsonify(films)
 
-# Получение фильмов
+# Получение одного фильма
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['GET'])
 def get_film(id):
     if id < 0 or id >= len(films):
         abort(404)
-    return films[id]
-
+    return jsonify(films[id])
 
 # Удаление фильма
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['DELETE'])
@@ -76,7 +74,6 @@ def del_film(id):
     del films[id]
     return '', 204
 
-
 # Редактирование существующего фильма
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['PUT'])
 def put_film(id):
@@ -84,14 +81,12 @@ def put_film(id):
         abort(404)
     
     film = request.get_json()
-    
     films[id] = film
-    return films[id]
-
+    return jsonify(films[id])
 
 # Добавление нового фильма
 @lab7.route('/lab7/rest-api/films/', methods=['POST'])
 def add_film():
     film = request.get_json()
-    new_id = len(films)-1
-    return str(new_id), 201
+    films.append(film)
+    return jsonify(len(films) - 1)
