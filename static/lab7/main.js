@@ -89,16 +89,19 @@ function addFilm() {
 
 // Функция отправки фильма на сервер
 function sendFilm() {
-    // Получение данных из формы
+    const id = document.getElementById('id').value;
     const film = {
         title: document.getElementById('title').value,
         title_ru: document.getElementById('title-ru').value,
         year: document.getElementById('year').value,
         description: document.getElementById('description').value
     };
+    
+    const url = id === '' ? '/lab7/rest-api/films/' : `/lab7/rest-api/films/${id}`;
+    const method = id === '' ? 'POST' : 'PUT';
 
-    fetch('/lab7/rest-api/films/', {
-        method: 'POST',
+    fetch(url, {
+        method: method,
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(film)
     })
@@ -106,4 +109,19 @@ function sendFilm() {
         fillFilmList();
         hideModal();
     });
+}
+
+function editFilm(id) {
+    fetch(`/lab7/rest-api/films/${id}`)
+        .then(function (data) {
+            return data.json();
+        })
+        .then(function (film) {
+            document.getElementById('id').value = id;
+            document.getElementById('title').value = film.title;
+            document.getElementById('title-ru').value = film.title_ru;
+            document.getElementById('year').value = film.year;
+            document.getElementById('description').value = film.description;
+            showModal();
+        });
 }
