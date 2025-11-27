@@ -82,8 +82,7 @@ function addFilm() {
     document.getElementById('title-ru').value = "";
     document.getElementById('year').value = "";
     document.getElementById('description').value = "";
-    
-    // Показ модального окна
+    document.getElementById('description-error').innerText = '';
     showModal();
 }
 
@@ -100,15 +99,25 @@ function sendFilm() {
     const url = id === '' ? '/lab7/rest-api/films/' : `/lab7/rest-api/films/${id}`;
     const method = id === '' ? 'POST' : 'PUT';
 
+    document.getElementById('description-error').innerText = '';
+
     fetch(url, {
         method: method,
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(film)
     })
-    .then(function() {
-        fillFilmList();
-        hideModal();
-    });
+    .then(function(resp) {
+        if(resp.ok) {
+            fillFilmList();
+            hideModal();
+            return {};
+        }
+        return resp.json();
+    })
+    .then(function(errors) {
+        if(errors.description)
+            document.getElementById('description-error').innerText = errors.description;
+    })
 }
 
 function editFilm(id) {
@@ -122,6 +131,7 @@ function editFilm(id) {
             document.getElementById('title-ru').value = film.title_ru;
             document.getElementById('year').value = film.year;
             document.getElementById('description').value = film.description;
+            document.getElementById('description-error').innerText = '';
             showModal();
         });
 }

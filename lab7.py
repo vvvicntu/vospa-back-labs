@@ -81,6 +81,8 @@ def put_film(id):
         abort(404)
     
     film = request.get_json()
+    if film['description'] == '':
+        return {'description': 'Заполните описание'}, 400
     films[id] = film
     return jsonify(films[id])
 
