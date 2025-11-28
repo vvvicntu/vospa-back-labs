@@ -54,19 +54,16 @@ films = [
 def main():
     return render_template('lab7/index.html')
 
-# Получение всех фильмов
 @lab7.route('/lab7/rest-api/films/', methods=['GET'])
 def get_films():
     return jsonify(films)
 
-# Получение одного фильма
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['GET'])
 def get_film(id):
     if id < 0 or id >= len(films):
         abort(404)
     return jsonify(films[id])
 
-# Удаление фильма
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['DELETE'])
 def del_film(id):
     if id < 0 or id >= len(films):
@@ -74,33 +71,106 @@ def del_film(id):
     del films[id]
     return '', 204
 
-# Редактирование существующего фильма
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['PUT'])
 def put_film(id):
     if id < 0 or id >= len(films):
         abort(404)
-    
-    film = request.get_json()
 
-    if film.get('title', '') == '' and film.get('title_ru', '') != '':
-        film['title'] = film['title_ru']
+    film = request.get_json() or {}
 
-    if film.get('description', '') == '':
-        return {'description': 'Заполните описание'}, 400
+    # берём значения безопасно и обрезаем пробелы
+    title = str(film.get('title', '') or '').strip()
+    title_ru = str(film.get('title_ru', '') or '').strip()
+    description = str(film.get('description', '') or '').strip()
+    year_raw = film.get('year', None)
+
+    errors = {}
+
+    # Проверяем русское название — оно должно быть непустым
+    if title_ru == '':
+        errors['title_ru'] = 'Заполните русское название'
+
+    # Если original пустой, но есть русское — подставляем
+    if title == '' and title_ru != '':
+        title = title_ru
+
+    # Проверка года — приводим к int и валидируем
     
-    films[id] = film
+    year = int(year_raw)
+    import datetime
+    current_year = datetime.datetime.now().year
+    if year < 1895 or year > current_year:
+        errors['year'] = f'Год должен быть от 1895 до {current_year}'
+
+    # Описание
+    if description == '':
+        errors['description'] = 'Заполните описание'
+    elif len(description) > 2000:
+        errors['description'] = 'Описание не должно превышать 2000 символов'
+
+    if errors:
+        return errors, 400
+
+    # Обновляем фильм
+    films[id] = {
+        'title': title,
+        'title_ru': title_ru,
+        'year': year,
+        'description': description
+    }
+
     return jsonify(films[id])
 
-# Добавление нового фильма
+
 @lab7.route('/lab7/rest-api/films/', methods=['POST'])
 def add_film():
-    film = request.get_json()
+    film = request.get_json() or {}
 
-    if film.get('title', '') == '' and film.get('title_ru', '') != '':
-        film['title'] = film['title_ru']
-        
-    if film.get('description', '') == '':
-        return {'description': 'Заполните описание'}, 400
-    
-    films.append(film)
+    title = str(film.get('title', '') or '').strip()
+    title_ru = str(film.get('title_ru', '') or '').strip()
+    description = str(film.get('description', '') or '').strip()
+    year_raw = film.get('year', None)
+
+    errors = {}
+
+    # Русское название — обязателено (по методичке)
+    if title_ru == '':
+        errors['title_ru'] = 'Заполните русское название'
+
+    # Если русское пустое — оригинальное обязателено
+    if title_ru == '' and title == '':
+        errors['title'] = 'Заполните название на оригинальном языке или русское название'
+
+    # Если original пустой, но есть русское — подставляем
+    if title == '' and title_ru != '':
+        title = title_ru
+
+    # Проверка года
+    try:
+        year = int(year_raw)
+    except (TypeError, ValueError):
+        errors['year'] = 'Год должен быть числом'
+    else:
+        import datetime
+        current_year = datetime.datetime.now().year
+        if year < 1895 or year > current_year:
+            errors['year'] = f'Год должен быть от 1895 до {current_year}'
+
+    # Описание
+    if description == '':
+        errors['description'] = 'Заполните описание'
+    elif len(description) > 2000:
+        errors['description'] = 'Описание не должно превышать 2000 символов'
+
+    if errors:
+        return errors, 400
+
+    new_film = {
+        'title': title,
+        'title_ru': title_ru,
+        'year': year,
+        'description': description
+    }
+
+    films.append(new_film)
     return jsonify(len(films) - 1)

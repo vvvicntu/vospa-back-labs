@@ -4,6 +4,7 @@
 
 {% block script %}
 <script src="{{ url_for('static', filename='lab7/main.js') }}"></script>
+
 <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -61,17 +62,6 @@
         background-color: #3a76d8;
     }
 
-    div > button {
-        background-color: #d0639b;
-        padding: 10px 20px;
-        font-size: 16px;
-        margin: 20px 0;
-    }
-
-    div > button:hover {
-        background-color: #1d4a90;
-    }
-
     .modal {
         display: none;
         background: white;
@@ -100,26 +90,28 @@
 
     .modal label {
         display: block;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
         color: #2c5aa0;
         font-weight: 500;
     }
 
-    .modal input[type="text"],
-    .modal input[type="number"],
-    .modal textarea {
+    .modal input, .modal textarea {
         width: 100%;
-        padding: 10px;
-        margin-top: 5px;
+        padding: 8px;
+        margin-top: 4px;
+        margin-bottom: 3px;
         border: 1px solid #cce0ff;
         border-radius: 6px;
-        box-sizing: border-box;
         font-size: 14px;
+        box-sizing: border-box;
     }
 
-    .modal input[type="text"]:focus,
-    .modal input[type="number"]:focus,
-    .modal textarea
+    .error-message {
+        color: red;
+        font-size: 12px;
+        margin-bottom: 8px;
+        min-height: 14px;
+    }
 </style>
 {% endblock %}
 
@@ -148,29 +140,33 @@
 
 <div class="modal">
     <input type="hidden" id="id">
+
     <label>
         Название фильма на русском:
         <input type="text" id="title-ru">
-    </label><br>
+        <div id="title-ru-error" class="error-message"></div>
+    </label>
 
     <label>
-        Название фильма на оригинальном языке
-        <i>(если фильм русский, то оставьте пустым):</i>
+        Название фильма на оригинальном:
         <input type="text" id="title">
-    </label><br>
+        <div id="title-error" class="error-message"></div>
+    </label>
 
     <label>
         Год выпуска:
         <input type="number" id="year">
-    </label><br>
+        <div id="year-error" class="error-message"></div>
+    </label>
 
     <label>
         Описание:
         <textarea id="description"></textarea>
         <div id="description-error" class="error-message"></div>
-    </label><br>
+    </label>
 
     <button onclick="sendFilm()">ОК</button>
     <button onclick="cancel()">Отмена</button>
 </div>
+
 {% endblock %}
