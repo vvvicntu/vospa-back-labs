@@ -82,10 +82,10 @@ def put_film(id):
     
     film = request.get_json()
 
-    if film['title'] == '' and film['title_ru'] != '':
+    if film.get('title', '') == '' and film.get('title_ru', '') != '':
         film['title'] = film['title_ru']
 
-    if film['description'] == '':
+    if film.get('description', '') == '':
         return {'description': 'Заполните описание'}, 400
     
     films[id] = film
@@ -96,11 +96,10 @@ def put_film(id):
 def add_film():
     film = request.get_json()
 
-    if film['title'] == '' and film['title_ru'] != '':
+    if film.get('title', '') == '' and film.get('title_ru', '') != '':
         film['title'] = film['title_ru']
         
-    # Проверка описания для POST
-    if film['description'] == '':
+    if film.get('description', '') == '':
         return {'description': 'Заполните описание'}, 400
     
     films.append(film)

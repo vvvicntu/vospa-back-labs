@@ -10,14 +10,19 @@ function fillFilmList() {
             
             for(let i = 0; i < films.length; i++) {
                 let tr = document.createElement('tr');
-                let tdTitle = document.createElement('td');
-                let tdTitleRus = document.createElement('td');
+                let tdTitleRus = document.createElement('td'); 
+                let tdTitle = document.createElement('td');   
                 let tdYear = document.createElement('td');
                 let tdActions = document.createElement('td');
 
-                // Заполняем ячейки данными
-                tdTitle.innerText = films[i].title == films[i].title_ru ? '' : films[i].title;
                 tdTitleRus.innerText = films[i].title_ru;
+                
+                if (films[i].title && films[i].title !== films[i].title_ru) {
+                    tdTitle.innerHTML = `<i>(${films[i].title})</i>`;
+                } else {
+                    tdTitle.innerText = ''; 
+                }
+                
                 tdYear.innerText = films[i].year;
 
                 // Создаем кнопки действий
@@ -37,9 +42,9 @@ function fillFilmList() {
                 tdActions.append(editButton);
                 tdActions.append(delButton);
 
-                // Добавляем ячейки в строку
-                tr.append(tdTitle);
-                tr.append(tdTitleRus);
+                // Добавляем ячейки в строку 
+                tr.append(tdTitleRus); 
+                tr.append(tdTitle);   
                 tr.append(tdYear);
                 tr.append(tdActions);
 
