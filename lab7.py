@@ -1,54 +1,41 @@
-from flask import Blueprint, render_template, request, abort, jsonify
+from flask import Blueprint, render_template, request, abort, jsonify, current_app
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import sqlite3
+from os import path
 
 lab7 = Blueprint('lab7', __name__)
 
-films = [
-    {
-        "title": "Domohoziayki",
-        "title_ru": "Отчаянные домохозяйки",
-        "year": 2004,
-        "description": "Сериал «Отчаянные домохозяйки» \
-         рассказывает о жизни нескольких женщин, живущих на улице Вистерия Лейн, \
-         и затрагивает важные проблемы, с которыми они сталкиваются в повседневной \
-         жизни. Сюжет начинается с самоубийства Мэри Элис Янг, что шокирует её подруг, \
-         и вскоре раскрывает их неидеальные жизни и тайны."
-    },
-    {
-        "title": "The Green Mile",
-        "title_ru": "Зеленая миля",
-        "year": 1999,
-        "description": "Фильм рассказывает историю Пола Эджкомба, надзирателя \
-        в тюрьме смертников, и его встречу с Джоном Коффи, необычным заключенным, \
-        обладающим сверхъестественными способностями исцеления. Действие разворачивается \
-        в 1930-х годах и показывает, как чудеса и несправедливость переплетаются \
-        на пороге смерти."
-    },
-    {
-        "title": "The Human Centipede",
-        "title_ru": "Человеческая многоножка",
-        "year": 2009,
-        "description": "Шокирующий фильм ужасов о безумном хирурге докторе Хайтере, \
-        который похищает людей и сшивает их вместе в единую пищеварительную систему - \
-        создавая 'человеческую многоножку'. Жертвы соединены рот-к-анусу, образуя \
-        живую цепь, что приводит к ужасающим физическим и психологическим мучениям. \
-        Фильм стал одним из самых противоречивых и шокирующих в истории жанра ужасов."
-    },
-    {
-        "title": "Green Elephant",
-        "title_ru": "Зеленый слоник",
-        "year": 1999,
-        "description": "Культовый российский фильм ужасов, действие которого \
-        происходит в закрытом военном учреждении. Два заключенных офицера \
-        оказываются в замкнутом пространстве, где сталкиваются с безумием, \
-        жестокостью и абсурдом системы."
-    },
-    {
-        "title": "Alice in Wonderland",
-        "title_ru": "Алиса в стране чудес с Аней Пересильд",
-        "year": 2025,
-        "description": "Полный кринж."
-    }
-]
+def db_connect():
+    # Подключение к postgres
+    if current_app.config.get('DB_TYPE') == 'postgres':
+        conn = psycopg2.connect(
+            host='127.0.0.1',
+            database='vika_vosp',
+            user='vika_vosp',
+            password='666'
+        )
+        conn.set_client_encoding('UTF8')  
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+    else:
+        # Подключение к SQLite
+        dir_path = path.dirname(path.realpath(__file__))
+        db_path = path.join(dir_path, "database.db")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+    return conn, cur
+
+def db_close(conn, cur):
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+@lab7.after_request
+def add_utf8_header(response):
+    response.headers['Content-Type'] = 'text/html; charset=utf-8'
+    return response
 
 @lab7.route('/lab7/')
 def main():
@@ -56,24 +43,54 @@ def main():
 
 @lab7.route('/lab7/rest-api/films/', methods=['GET'])
 def get_films():
-    return jsonify(films)
+    conn, cur = db_connect()
+    cur.execute("SELECT * FROM films ORDER BY id")
+    films = cur.fetchall()
+    db_close(conn, cur)
+    
+    # Конвертируем в обычный список словарей
+    films_list = []
+    for film in films:
+        films_list.append(dict(film))
+    
+    return jsonify(films_list)
 
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['GET'])
 def get_film(id):
-    if id < 0 or id >= len(films):
+    conn, cur = db_connect()
+    cur.execute("SELECT * FROM films WHERE id = %s", (id,))
+    film = cur.fetchone()
+    db_close(conn, cur)
+    
+    if not film:
         abort(404)
-    return jsonify(films[id])
+    
+    return jsonify(dict(film))
 
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['DELETE'])
 def del_film(id):
-    if id < 0 or id >= len(films):
+    conn, cur = db_connect()
+    cur.execute("SELECT * FROM films WHERE id = %s", (id,))
+    film = cur.fetchone()
+    
+    if not film:
+        db_close(conn, cur)
         abort(404)
-    del films[id]
+    
+    cur.execute("DELETE FROM films WHERE id = %s", (id,))
+    db_close(conn, cur)
     return '', 204
 
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['PUT'])
 def put_film(id):
-    if id < 0 or id >= len(films):
+    conn, cur = db_connect()
+    
+    # Проверяем существование фильма
+    cur.execute("SELECT * FROM films WHERE id = %s", (id,))
+    film_exists = cur.fetchone()
+    
+    if not film_exists:
+        db_close(conn, cur)
         abort(404)
 
     film = request.get_json() or {}
@@ -95,12 +112,14 @@ def put_film(id):
         title = title_ru
 
     # Проверка года — приводим к int и валидируем
-    
-    year = int(year_raw)
-    import datetime
-    current_year = datetime.datetime.now().year
-    if year < 1895 or year > current_year:
-        errors['year'] = f'Год должен быть от 1895 до {current_year}'
+    try:
+        year = int(year_raw)
+        import datetime
+        current_year = datetime.datetime.now().year
+        if year < 1895 or year > current_year:
+            errors['year'] = f'Год должен быть от 1895 до {current_year}'
+    except (TypeError, ValueError):
+        errors['year'] = 'Год должен быть числом'
 
     # Описание
     if description == '':
@@ -109,18 +128,22 @@ def put_film(id):
         errors['description'] = 'Описание не должно превышать 2000 символов'
 
     if errors:
+        db_close(conn, cur)
         return errors, 400
 
-    # Обновляем фильм
-    films[id] = {
-        'title': title,
-        'title_ru': title_ru,
-        'year': year,
-        'description': description
-    }
-
-    return jsonify(films[id])
-
+    # Обновляем фильм в БД
+    cur.execute("""
+        UPDATE films 
+        SET title = %s, title_ru = %s, year = %s, description = %s 
+        WHERE id = %s
+    """, (title, title_ru, year, description, id))
+    
+    # Получаем обновленный фильм
+    cur.execute("SELECT * FROM films WHERE id = %s", (id,))
+    updated_film = cur.fetchone()
+    
+    db_close(conn, cur)
+    return jsonify(dict(updated_film))
 
 @lab7.route('/lab7/rest-api/films/', methods=['POST'])
 def add_film():
@@ -133,11 +156,11 @@ def add_film():
 
     errors = {}
 
-    # Русское название — обязателено (по методичке)
+    # Русское название — обязательно (по методичке)
     if title_ru == '':
         errors['title_ru'] = 'Заполните русское название'
 
-    # Если русское пустое — оригинальное обязателено
+    # Если русское пустое — оригинальное обязательно
     if title_ru == '' and title == '':
         errors['title'] = 'Заполните название на оригинальном языке или русское название'
 
@@ -148,13 +171,12 @@ def add_film():
     # Проверка года
     try:
         year = int(year_raw)
-    except (TypeError, ValueError):
-        errors['year'] = 'Год должен быть числом'
-    else:
         import datetime
         current_year = datetime.datetime.now().year
         if year < 1895 or year > current_year:
             errors['year'] = f'Год должен быть от 1895 до {current_year}'
+    except (TypeError, ValueError):
+        errors['year'] = 'Год должен быть числом'
 
     # Описание
     if description == '':
@@ -165,12 +187,17 @@ def add_film():
     if errors:
         return errors, 400
 
-    new_film = {
-        'title': title,
-        'title_ru': title_ru,
-        'year': year,
-        'description': description
-    }
+    conn, cur = db_connect()
+    
+    # Добавляем фильм в БД
+    cur.execute("""
+        INSERT INTO films (title, title_ru, year, description) 
+        VALUES (%s, %s, %s, %s) 
+        RETURNING id
+    """, (title, title_ru, year, description))
+    
+    new_id = cur.fetchone()['id']
+    db_close(conn, cur)
+    
+    return jsonify(new_id)
 
-    films.append(new_film)
-    return jsonify(len(films) - 1)

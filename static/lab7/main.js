@@ -26,11 +26,11 @@ function fillFilmList() {
 
                 let editBtn = document.createElement('button');
                 editBtn.innerText = 'редактировать';
-                editBtn.onclick = () => editFilm(i);
+                editBtn.onclick = () => editFilm(films[i].id);  // Используем ID из БД
 
                 let delBtn = document.createElement('button');
                 delBtn.innerText = 'удалить';
-                delBtn.onclick = () => deleteFilm(i);
+                delBtn.onclick = () => deleteFilm(films[i].id);  // Используем ID из БД
 
                 tdActions.append(editBtn);
                 tdActions.append(delBtn);
@@ -133,3 +133,8 @@ function editFilm(id) {
             showModal();
         });
 }
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    fillFilmList();
+});
