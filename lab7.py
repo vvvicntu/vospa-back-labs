@@ -31,10 +31,13 @@ def db_close(conn, cur):
     conn.commit()
     cur.close()
     conn.close()
-    
+
 @lab7.after_request
 def add_utf8_header(response):
-    response.headers['Content-Type'] = 'text/html; charset=utf-8'
+    if response.content_type.startswith("application/json"):
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
+    else:
+        response.headers["Content-Type"] = "text/html; charset=utf-8"
     return response
 
 @lab7.route('/lab7/')
