@@ -32,6 +32,7 @@ def db_close(conn, cur):
     cur.close()
     conn.close()
 
+# исправление проблемы с кодировкой (добавляет заголовок charset=utf-8)
 @lab7.after_request
 def add_utf8_header(response):
     if response.content_type.startswith("application/json"):
@@ -51,12 +52,12 @@ def get_films():
     films = cur.fetchall()
     db_close(conn, cur)
     
-    # Конвертируем в обычный список словарей
+    # конвертируем в обычный список словарей
     films_list = []
     for film in films:
         films_list.append(dict(film))
     
-    return jsonify(films_list)
+    return jsonify(films_list) # возвращаем в json
 
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['GET'])
 def get_film(id):
@@ -82,8 +83,9 @@ def del_film(id):
     
     cur.execute("DELETE FROM films WHERE id = %s", (id,))
     db_close(conn, cur)
-    return '', 204
+    return '', 204 #204 - успешное удаление
 
+# обновить
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['PUT'])
 def put_film(id):
     conn, cur = db_connect()
@@ -98,7 +100,7 @@ def put_film(id):
 
     film = request.get_json() or {}
 
-    # берём значения безопасно и обрезаем пробелы
+    # берём значения и обрезаем пробелы
     title = str(film.get('title', '') or '').strip()
     title_ru = str(film.get('title_ru', '') or '').strip()
     description = str(film.get('description', '') or '').strip()
@@ -106,7 +108,7 @@ def put_film(id):
 
     errors = {}
 
-    # Проверяем русское название — оно должно быть непустым
+    # проверяем русское название 
     if title_ru == '':
         errors['title_ru'] = 'Заполните русское название'
 
@@ -114,7 +116,7 @@ def put_film(id):
     if title == '' and title_ru != '':
         title = title_ru
 
-    # Проверка года — приводим к int и валидируем
+    # проверка года 
     try:
         year = int(year_raw)
         import datetime
@@ -124,7 +126,7 @@ def put_film(id):
     except (TypeError, ValueError):
         errors['year'] = 'Год должен быть числом'
 
-    # Описание
+    # описание
     if description == '':
         errors['description'] = 'Заполните описание'
     elif len(description) > 2000:
@@ -134,20 +136,20 @@ def put_film(id):
         db_close(conn, cur)
         return errors, 400
 
-    # Обновляем фильм в БД
     cur.execute("""
         UPDATE films 
         SET title = %s, title_ru = %s, year = %s, description = %s 
         WHERE id = %s
     """, (title, title_ru, year, description, id))
     
-    # Получаем обновленный фильм
+    # получаем обновленный фильм
     cur.execute("SELECT * FROM films WHERE id = %s", (id,))
     updated_film = cur.fetchone()
     
     db_close(conn, cur)
     return jsonify(dict(updated_film))
 
+# создать новый
 @lab7.route('/lab7/rest-api/films/', methods=['POST'])
 def add_film():
     film = request.get_json() or {}
@@ -159,19 +161,15 @@ def add_film():
 
     errors = {}
 
-    # Русское название — обязательно (по методичке)
     if title_ru == '':
         errors['title_ru'] = 'Заполните русское название'
 
-    # Если русское пустое — оригинальное обязательно
     if title_ru == '' and title == '':
         errors['title'] = 'Заполните название на оригинальном языке или русское название'
 
-    # Если original пустой, но есть русское — подставляем
     if title == '' and title_ru != '':
         title = title_ru
 
-    # Проверка года
     try:
         year = int(year_raw)
         import datetime
@@ -181,7 +179,7 @@ def add_film():
     except (TypeError, ValueError):
         errors['year'] = 'Год должен быть числом'
 
-    # Описание
+
     if description == '':
         errors['description'] = 'Заполните описание'
     elif len(description) > 2000:
@@ -192,7 +190,6 @@ def add_film():
 
     conn, cur = db_connect()
     
-    # Добавляем фильм в БД
     cur.execute("""
         INSERT INTO films (title, title_ru, year, description) 
         VALUES (%s, %s, %s, %s) 
