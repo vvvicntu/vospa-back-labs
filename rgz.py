@@ -4,17 +4,25 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import sqlite3
 from os import path
-import json
-from datetime import datetime
 
 rgz = Blueprint('rgz', __name__)
 
-# Администратор
 ADMIN_LOGIN = "vika"
 ADMIN_PASSWORD = "111"
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
+
+# ф-я ошибок
+def make_error(code, msg, request_id=None):
+    return {
+        'jsonrpc': '2.0',
+        'error': {
+            'code': code,
+            'message': msg
+        },
+        'id': request_id
+    }
 
 def db_connect():
     if current_app.config.get('DB_TYPE') == 'postgres':
@@ -24,10 +32,9 @@ def db_connect():
             user='vika_rgz',
             password='123'
         )
-        conn.set_client_encoding('UTF8')  
+        conn.set_client_encoding('UTF8')
         cur = conn.cursor(cursor_factory=RealDictCursor)
     else:
-        # Подключение к SQLite
         dir_path = path.dirname(path.realpath(__file__))
         db_path = path.join(dir_path, "database.db")
         conn = sqlite3.connect(db_path)
@@ -45,7 +52,6 @@ def db_close(conn, cur):
 def main():
     if 'user_id' not in session:
         return render_template('rgz/rgz.html')
-    
     return render_template('rgz/main.html', login=session.get('login'), is_admin=session.get('login') == ADMIN_LOGIN)
 
 @rgz.route('/rgz/login')
@@ -54,130 +60,110 @@ def login_page():
 
 @rgz.route('/rgz/register')
 def register_page():
-    """Страница регистрации"""
     return render_template('rgz/register.html')
 
 @rgz.route('/rgz/logout')
 def logout():
-    """Выход из системы"""
     session.clear()
     return redirect('/rgz')
 
-# JSON-RPC API (как в методичке)
 @rgz.route('/rgz/api', methods=['POST'])
 def api():
-    """Обработчик JSON-RPC API (как в методичке)"""
     data = request.json
-    
-    # Проверяем, что это JSON-RPC 2.0
+    request_id = data.get('id')
+
     if data.get('jsonrpc') != '2.0':
-        return jsonify({
-            'jsonrpc': '2.0',
-            'error': {
-                'code': -32600,
-                'message': 'Invalid Request'
-            },
-            'id': data.get('id')
-        })
-    
+        return jsonify(make_error(-32600, 'Invalid Request', request_id))
+
     method = data.get('method')
     params = data.get('params', {})
-    request_id = data.get('id')
-    
-    # Обработка методов (как в методичке - через if/elif)
-    if method == 'register':
-        result = handle_register(params)
-    elif method == 'login':
-        result = handle_login(params)
-    elif method == 'logout':
-        result = handle_logout()
-    elif method == 'get_users':
-        result = handle_get_users()
-    elif method == 'get_messages':
-        result = handle_get_messages(params)
-    elif method == 'send_message':
-        result = handle_send_message(params)
-    elif method == 'delete_message':
-        result = handle_delete_message(params)
-    elif method == 'delete_user':
-        result = handle_delete_user(params)
-    else:
-        return jsonify({
-            'jsonrpc': '2.0',
-            'error': {
-                'code': -32601,
-                'message': 'Method not found'
-            },
-            'id': request_id
-        })
-    
-    return jsonify({
-        'jsonrpc': '2.0',
-        'result': result,
-        'id': request_id
-    })
 
-# Обработчики методов
-def handle_register(params):
-    """Регистрация пользователя"""
+    if method == 'register':
+        return jsonify(handle_register(params, request_id))
+    elif method == 'login':
+        return jsonify(handle_login(params, request_id))
+    elif method == 'logout':
+        return jsonify(handle_logout(request_id))
+    elif method == 'get_users':
+        return jsonify(handle_get_users(request_id))
+    elif method == 'get_messages':
+        return jsonify(handle_get_messages(params, request_id))
+    elif method == 'send_message':
+        return jsonify(handle_send_message(params, request_id))
+    elif method == 'delete_message':
+        return jsonify(handle_delete_message(params, request_id))
+    elif method == 'delete_user':
+        return jsonify(handle_delete_user(params, request_id))
+    else:
+        return jsonify(make_error(-32601, 'Method not found', request_id))
+
+# ф-и для каждого из методов
+def handle_register(params, request_id):
+
+    # убираем лишние пробелы
     login = params.get('login', '').strip()
     password = params.get('password', '').strip()
-    
+
     if not login or not password:
-        raise Exception("Логин и пароль обязательны")
-    
+        return make_error(2, "Логин и пароль обязательны", request_id)
+
     if len(login) < 3:
-        raise Exception("Логин должен быть не менее 3 символов")
-    
+        return make_error(2, "Логин должен быть не менее 3 символов", request_id)
+
     password_hash = hash_password(password)
-    
+
     conn, cur = db_connect()
     try:
+        # добавляем пользователя (RETURNING id возвращает ID)
         cur.execute(
             "INSERT INTO users (login, password_hash) VALUES (%s, %s) RETURNING id",
             (login, password_hash)
         )
-        user_id = cur.fetchone()['id']
-        return {'success': True, 'user_id': user_id}
+        user_id = cur.fetchone()['id'] # извлекает ID созданного пользователя
+        return {'jsonrpc': '2.0', 'result': {'success': True, 'user_id': user_id}, 'id': request_id}
+
     except psycopg2.IntegrityError:
-        raise Exception("Пользователь с таким логином уже существует")
+        return make_error(2, "Пользователь с таким логином уже существует", request_id)
+
     finally:
         db_close(conn, cur)
 
-def handle_login(params):
-    """Авторизация пользователя"""
+
+def handle_login(params, request_id):
     login = params.get('login', '').strip()
     password = params.get('password', '').strip()
-    
     password_hash = hash_password(password)
-    
+
     conn, cur = db_connect()
+
+    # находим пользователя в бд
     cur.execute(
         "SELECT id, login FROM users WHERE login = %s AND password_hash = %s",
         (login, password_hash)
     )
     user = cur.fetchone()
     db_close(conn, cur)
-    
+
     if not user:
-        raise Exception("Неверный логин или пароль")
-    
-    # Сохраняем в сессии
+        return make_error(2, "Неверный логин или пароль", request_id)
+
+    # создаем сессию
     session['user_id'] = user['id']
     session['login'] = user['login']
-    
-    return {'success': True, 'user': {'id': user['id'], 'login': user['login']}}
 
-def handle_logout():
-    """Выход из системы"""
+    return {'jsonrpc': '2.0', 'result': {'success': True, 'user': {'id': user['id'], 'login': user['login']}}, 'id': request_id}
+
+
+def handle_logout(request_id):
     session.clear()
-    return {'success': True}
+    return {'jsonrpc': '2.0', 'result': {'success': True}, 'id': request_id}
 
-def handle_get_users():
-    """Получение списка пользователей"""
+
+def handle_get_users(request_id):
+    # существует ли user_id в сессии
     if 'user_id' not in session:
-        raise Exception("Требуется авторизация")
-    
+        return make_error(1, "Требуется авторизация", request_id)
+
     conn, cur = db_connect()
     cur.execute(
         "SELECT id, login, created_at FROM users WHERE id != %s ORDER BY login",
@@ -185,7 +171,7 @@ def handle_get_users():
     )
     users = cur.fetchall()
     db_close(conn, cur)
-    
+
     users_list = []
     for user in users:
         users_list.append({
@@ -193,23 +179,24 @@ def handle_get_users():
             'login': user['login'],
             'created_at': user['created_at'].isoformat() if user['created_at'] else None
         })
-    
-    return users_list
 
-def handle_get_messages(params):
-    """Получение сообщений с пользователем"""
+    return {'jsonrpc': '2.0', 'result': users_list, 'id': request_id}
+
+
+def handle_get_messages(params, request_id):
     if 'user_id' not in session:
-        raise Exception("Требуется авторизация")
+        return make_error(1, "Требуется авторизация", request_id)
     
-    user_id = session['user_id']
+    # params приходит от фронта, получаем ID с кем показать переписку
     other_user_id = params.get('user_id')
-    
+
     if not other_user_id:
-        raise Exception("Не указан ID пользователя")
-    
+        return make_error(2, "Не указан ID пользователя", request_id)
+
+    # текущий ID
+    user_id = session['user_id']
+
     conn, cur = db_connect()
-    
-    # Получаем сообщения между двумя пользователями
     cur.execute('''
         SELECT m.id, m.sender_id, m.receiver_id, m.text, m.created_at,
                u1.login as sender_login, u2.login as receiver_login
@@ -222,10 +209,10 @@ def handle_get_messages(params):
           AND NOT (m.receiver_id = %s AND m.is_deleted_receiver)
         ORDER BY m.created_at
     ''', (user_id, other_user_id, other_user_id, user_id, user_id, user_id))
-    
+
     messages = cur.fetchall()
     db_close(conn, cur)
-    
+
     messages_list = []
     for msg in messages:
         messages_list.append({
@@ -236,27 +223,27 @@ def handle_get_messages(params):
             'receiver_login': msg['receiver_login'],
             'text': msg['text'],
             'created_at': msg['created_at'].isoformat() if msg['created_at'] else None,
-            'is_my': msg['sender_id'] == user_id
+            'is_my': msg['sender_id'] == user_id #мое ли сообщение
         })
-    
-    return messages_list
 
-def handle_send_message(params):
-    """Отправка сообщения"""
+    return {'jsonrpc': '2.0', 'result': messages_list, 'id': request_id}
+
+
+def handle_send_message(params, request_id):
     if 'user_id' not in session:
-        raise Exception("Требуется авторизация")
-    
+        return make_error(1, "Требуется авторизация", request_id)
+
     receiver_id = params.get('receiver_id')
     text = params.get('text', '').strip()
-    
+
     if not receiver_id:
-        raise Exception("Не указан получатель")
-    
+        return make_error(2, "Не указан получатель", request_id)
+
     if not text:
-        raise Exception("Сообщение не может быть пустым")
-    
+        return make_error(2, "Сообщение не может быть пустым", request_id)
+
     sender_id = session['user_id']
-    
+
     conn, cur = db_connect()
     cur.execute(
         "INSERT INTO messages (sender_id, receiver_id, text) VALUES (%s, %s, %s) RETURNING id",
@@ -264,80 +251,60 @@ def handle_send_message(params):
     )
     message_id = cur.fetchone()['id']
     db_close(conn, cur)
-    
-    return {'success': True, 'message_id': message_id}
 
-def handle_delete_message(params):
-    """Удаление сообщения"""
+    return {'jsonrpc': '2.0', 'result': {'success': True, 'message_id': message_id}, 'id': request_id}
+
+
+def handle_delete_message(params, request_id):
     if 'user_id' not in session:
-        raise Exception("Требуется авторизация")
-    
+        return make_error(1, "Требуется авторизация", request_id)
+
+    #получаем id сообщения
     message_id = params.get('message_id')
     user_id = session['user_id']
-    
-    if not message_id:
-        raise Exception("Не указан ID сообщения")
-    
+
     conn, cur = db_connect()
-    
-    # Проверяем, принадлежит ли сообщение пользователю
     cur.execute(
         "SELECT sender_id, receiver_id FROM messages WHERE id = %s",
         (message_id,)
     )
     msg = cur.fetchone()
-    
-    if not msg:
-        raise Exception("Сообщение не найдено")
-    
-    # Обновляем флаг удаления в зависимости от того, отправитель или получатель
-    if msg['sender_id'] == user_id:
-        cur.execute(
-            "UPDATE messages SET is_deleted_sender = TRUE WHERE id = %s",
-            (message_id,)
-        )
-    elif msg['receiver_id'] == user_id:
-        cur.execute(
-            "UPDATE messages SET is_deleted_receiver = TRUE WHERE id = %s",
-            (message_id,)
-        )
-    else:
-        raise Exception("У вас нет прав на удаление этого сообщения")
-    
-    db_close(conn, cur)
-    return {'success': True}
 
-def handle_delete_user(params):
-    """Удаление пользователя (только для администратора)"""
+    if not msg:
+        db_close(conn, cur)
+        return make_error(3, "Сообщение не найдено", request_id)
+
+    if msg['sender_id'] == user_id:
+        cur.execute("UPDATE messages SET is_deleted_sender = TRUE WHERE id = %s", (message_id,))
+    elif msg['receiver_id'] == user_id:
+        cur.execute("UPDATE messages SET is_deleted_receiver = TRUE WHERE id = %s", (message_id,))
+    else:
+        db_close(conn, cur)
+        return make_error(2, "У вас нет прав на удаление этого сообщения", request_id)
+
+    db_close(conn, cur)
+    return {'jsonrpc': '2.0', 'result': {'success': True}, 'id': request_id}
+
+
+def handle_delete_user(params, request_id):
     if session.get('login') != ADMIN_LOGIN:
-        raise Exception("Требуются права администратора")
-    
+        return make_error(1, "Требуются права администратора", request_id)
+
     user_id = params.get('user_id')
-    
     if not user_id:
-        raise Exception("Не указан ID пользователя")
-    
+        return make_error(2, "Не указан ID пользователя", request_id)
+
     conn, cur = db_connect()
-    
-    # Проверяем, что не удаляем администратора
     cur.execute("SELECT login FROM users WHERE id = %s", (user_id,))
     user = cur.fetchone()
-    
+
     if user and user['login'] == ADMIN_LOGIN:
-        raise Exception("Нельзя удалить администратора")
-    
-    # Удаляем пользователя
+        db_close(conn, cur)
+        return make_error(2, "Нельзя удалить администратора", request_id)
+
     cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
-    
-    # Также удаляем все его сообщения (или помечаем как удаленные)
-    cur.execute(
-        "UPDATE messages SET is_deleted_sender = TRUE WHERE sender_id = %s",
-        (user_id,)
-    )
-    cur.execute(
-        "UPDATE messages SET is_deleted_receiver = TRUE WHERE receiver_id = %s",
-        (user_id,)
-    )
-    
+    cur.execute("UPDATE messages SET is_deleted_sender = TRUE WHERE sender_id = %s", (user_id,))
+    cur.execute("UPDATE messages SET is_deleted_receiver = TRUE WHERE receiver_id = %s", (user_id,))
+
     db_close(conn, cur)
-    return {'success': True}
+    return {'jsonrpc': '2.0', 'result': {'success': True}, 'id': request_id}

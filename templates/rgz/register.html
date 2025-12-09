@@ -4,7 +4,7 @@
 
 {% block script %}
 <script>
-    async function register() {
+    function register() {
         const login = document.getElementById('login').value.trim();
         const password = document.getElementById('password').value.trim();
         const confirmPassword = document.getElementById('confirmPassword').value.trim();
@@ -24,7 +24,8 @@
             return;
         }
         
-        const response = await fetch("{{ url_for('rgz.api') }}", {
+        // отправка данных на сервер
+        fetch("{{ url_for('rgz.api') }}", {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -33,16 +34,23 @@
                 params: { login, password },
                 id: Math.round(Math.random() * 1000)
             })
+        })
+        .then(function(response) {
+            // преобразуем ответ в JSON
+            return response.json();
+        })
+        .then(function(data) {
+            // обрабатываем данные
+            if (data.error) {
+                alert('Ошибка: ' + data.error.message);
+            } else {
+                alert('Регистрация успешна! Ваши данные слиты.');
+                window.location.href = "{{ url_for('rgz.login_page') }}";
+            }
+        })
+        .catch(function(error) {
+            alert('Ошибка сети: ' + error.message);
         });
-        
-        const data = await response.json();
-        
-        if (data.error) {
-            alert('Ошибка: ' + data.error.message);
-        } else {
-            alert('Регистрация успешна! Теперь войдите в систему.');
-            window.location.href = "{{ url_for('rgz.login_page') }}";
-        }
     }
     
     // Enter для регистрации
