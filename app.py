@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request, redirect, abort, render_template
+from flask import Flask, url_for, request
 from datetime import datetime
 import os
 from os import path
@@ -31,9 +31,8 @@ if app.config['DB_TYPE'] == 'postgres':
         f'postgresql://{db_user}:{db_password}@{host_ip}:{host_port}/{db_name}'
 
 else:
-    from os import path
     dir_path = path.dirname(path.realpath(__file__))
-    db_path = path.join(dir_path, "ivan_ivanov_orm.db")
+    db_path = path.join(dir_path, "vvv_orm.db")
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 
 db.init_app(app)
