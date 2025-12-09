@@ -1,0 +1,680 @@
+{% extends "base.html" %}
+
+{% block lab %}РГЗ - MAX Messenger{% endblock %}
+
+{% block script %}
+<script>
+    let currentChatUserId = null;
+    let messageInterval = null;
+    
+    // Получение списка пользователей
+    async function loadUsers() {
+        try {
+            const response = await fetch("{{ url_for('rgz.api') }}", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    method: 'get_users',
+                    id: Math.round(Math.random() * 1000)
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                if (data.error.code === 1) {
+                    window.location.href = "{{ url_for('rgz.login_page') }}";
+                }
+                return;
+            }
+            
+            const usersList = document.getElementById('users-list');
+            usersList.innerHTML = '';
+            
+            data.result.forEach(user => {
+                const userElement = document.createElement('div');
+                userElement.className = 'user-item';
+                userElement.innerHTML = `
+                    <div class="user-avatar">👤</div>
+                    <div class="user-info">
+                        <div class="user-name">${user.login}</div>
+                        <div class="user-status">Зарегистрирован: ${new Date(user.created_at).toLocaleDateString()}</div>
+                    </div>
+                `;
+                
+                userElement.onclick = () => openChat(user.id, user.login);
+                usersList.appendChild(userElement);
+            });
+            
+            // Загрузка административных функций
+            {% if is_admin %}
+            loadAdminPanel();
+            {% endif %}
+            
+        } catch (error) {
+            console.error('Ошибка загрузки пользователей:', error);
+        }
+    }
+    
+    // Открытие чата с пользователем
+    async function openChat(userId, userName) {
+        currentChatUserId = userId;
+        document.getElementById('chat-title').textContent = userName;
+        document.getElementById('chat-container').style.display = 'block';
+        document.getElementById('no-chat-selected').style.display = 'none';
+        
+        await loadMessages(userId);
+        
+        // Автообновление сообщений каждые 3 секунды
+        if (messageInterval) {
+            clearInterval(messageInterval);
+        }
+        messageInterval = setInterval(() => loadMessages(userId), 3000);
+    }
+    
+    // Загрузка сообщений
+    async function loadMessages(userId) {
+        try {
+            const response = await fetch("{{ url_for('rgz.api') }}", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    method: 'get_messages',
+                    params: { user_id: userId },
+                    id: Math.round(Math.random() * 1000)
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                return;
+            }
+            
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.innerHTML = '';
+            
+            data.result.forEach(msg => {
+                const messageElement = document.createElement('div');
+                messageElement.className = msg.is_my ? 'message my-message' : 'message other-message';
+                messageElement.innerHTML = `
+                    <div class="message-content">${msg.text}</div>
+                    <div class="message-info">
+                        <span class="message-time">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        <span class="message-sender">${msg.sender_login}</span>
+                        <button class="btn-delete" onclick="deleteMessage(${msg.id})" title="Удалить сообщение">×</button>
+                    </div>
+                `;
+                messagesContainer.appendChild(messageElement);
+            });
+            
+            // Прокрутка вниз
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+        } catch (error) {
+            console.error('Ошибка загрузки сообщений:', error);
+        }
+    }
+    
+    // Отправка сообщения
+    async function sendMessage() {
+        const input = document.getElementById('message-input');
+        const text = input.value.trim();
+        
+        if (!text || !currentChatUserId) {
+            return;
+        }
+        
+        try {
+            const response = await fetch("{{ url_for('rgz.api') }}", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    method: 'send_message',
+                    params: {
+                        receiver_id: currentChatUserId,
+                        text: text
+                    },
+                    id: Math.round(Math.random() * 1000)
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                alert('Ошибка отправки: ' + data.error.message);
+            } else {
+                input.value = '';
+                await loadMessages(currentChatUserId);
+            }
+            
+        } catch (error) {
+            console.error('Ошибка отправки сообщения:', error);
+        }
+    }
+    
+    // Удаление сообщения
+    async function deleteMessage(messageId) {
+        if (!confirm('Удалить это сообщение?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch("{{ url_for('rgz.api') }}", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    method: 'delete_message',
+                    params: { message_id: messageId },
+                    id: Math.round(Math.random() * 1000)
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                alert('Ошибка удаления: ' + data.error.message);
+            } else {
+                await loadMessages(currentChatUserId);
+            }
+            
+        } catch (error) {
+            console.error('Ошибка удаления сообщения:', error);
+        }
+    }
+    
+    // Enter для отправки сообщения
+    function handleKeyPress(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    }
+    
+    // Выход из системы
+    async function logout() {
+        try {
+            await fetch("{{ url_for('rgz.api') }}", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    method: 'logout',
+                    id: Math.round(Math.random() * 1000)
+                })
+            });
+            
+            window.location.href = "{{ url_for('rgz.main') }}";
+            
+        } catch (error) {
+            console.error('Ошибка выхода:', error);
+        }
+    }
+    
+    {% if is_admin %}
+    // Панель администратора
+    async function loadAdminPanel() {
+        const adminPanel = document.getElementById('admin-panel');
+        adminPanel.style.display = 'block';
+        
+        // Загрузка пользователей для удаления
+        const response = await fetch("{{ url_for('rgz.api') }}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'get_users',
+                id: Math.round(Math.random() * 1000)
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!data.error) {
+            const deleteSelect = document.getElementById('delete-user-select');
+            deleteSelect.innerHTML = '<option value="">Выберите пользователя</option>';
+            
+            data.result.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.login;
+                deleteSelect.appendChild(option);
+            });
+        }
+    }
+    
+    // Удаление пользователя (админ)
+    async function deleteUser() {
+        const select = document.getElementById('delete-user-select');
+        const userId = select.value;
+        
+        if (!userId) {
+            alert('Выберите пользователя');
+            return;
+        }
+        
+        if (!confirm('Удалить этого пользователя и все его сообщения?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch("{{ url_for('rgz.api') }}", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    method: 'delete_user',
+                    params: { user_id: userId },
+                    id: Math.round(Math.random() * 1000)
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                alert('Ошибка: ' + data.error.message);
+            } else {
+                alert('Пользователь удалён');
+                loadUsers();
+                select.value = '';
+            }
+            
+        } catch (error) {
+            console.error('Ошибка удаления пользователя:', error);
+        }
+    }
+    {% endif %}
+    
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        loadUsers();
+        document.getElementById('message-input').addEventListener('keypress', handleKeyPress);
+    });
+    
+    // Очистка интервала при закрытии страницы
+    window.addEventListener('beforeunload', function() {
+        if (messageInterval) {
+            clearInterval(messageInterval);
+        }
+    });
+</script>
+{% endblock %}
+
+{% block main %}
+<style>
+    .messenger-wrapper {
+        display: flex;
+        height: 80vh;
+        max-width: 1200px;
+        margin: 20px auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        overflow: hidden;
+    }
+    
+    /* Левая панель - список пользователей */
+    .users-panel {
+        width: 300px;
+        border-right: 1px solid #e0e0e0;
+        display: flex;
+        flex-direction: column;
+        background: #f8f9fa;
+    }
+    
+    .users-header {
+        padding: 20px;
+        background: #0088cc;
+        color: white;
+    }
+    
+    .user-info-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .current-user-avatar {
+        font-size: 24px;
+    }
+    
+    .current-user-name {
+        font-weight: 500;
+        font-size: 16px;
+    }
+    
+    .btn-logout {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+        font-size: 14px;
+        transition: background 0.3s;
+    }
+    
+    .btn-logout:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .users-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+    }
+    
+    .user-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-bottom: 5px;
+    }
+    
+    .user-item:hover {
+        background: #e9ecef;
+    }
+    
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: #0088cc;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        font-size: 20px;
+    }
+    
+    .user-info {
+        flex: 1;
+    }
+    
+    .user-name {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .user-status {
+        font-size: 12px;
+        color: #666;
+    }
+    
+    /* Правая панель - чат */
+    .chat-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: white;
+    }
+    
+    .chat-header {
+        padding: 20px;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: white;
+    }
+    
+    .chat-title {
+        font-size: 18px;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .chat-container {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background: #f0f2f5;
+    }
+    
+    .no-chat-selected {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #666;
+        text-align: center;
+    }
+    
+    .no-chat-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    /* Сообщения */
+    .message {
+        max-width: 70%;
+        margin-bottom: 15px;
+        padding: 10px 15px;
+        border-radius: 15px;
+        position: relative;
+    }
+    
+    .my-message {
+        background: #0088cc;
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 5px;
+    }
+    
+    .other-message {
+        background: white;
+        color: #333;
+        margin-right: auto;
+        border-bottom-left-radius: 5px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .message-content {
+        word-wrap: break-word;
+        line-height: 1.4;
+    }
+    
+    .message-info {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: 5px;
+        font-size: 12px;
+        opacity: 0.8;
+    }
+    
+    .message-time {
+        margin-right: 8px;
+    }
+    
+    .message-sender {
+        flex: 1;
+        text-align: left;
+    }
+    
+    .btn-delete {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 0 5px;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+    }
+    
+    .btn-delete:hover {
+        opacity: 1;
+    }
+    
+    /* Поле ввода сообщения */
+    .message-input-container {
+        padding: 20px;
+        border-top: 1px solid #e0e0e0;
+        background: white;
+    }
+    
+    .message-input-wrapper {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+    }
+    
+    .message-input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 20px;
+        font-size: 14px;
+        resize: none;
+        min-height: 40px;
+        max-height: 100px;
+        font-family: inherit;
+        transition: border-color 0.3s;
+    }
+    
+    .message-input:focus {
+        outline: none;
+        border-color: #0088cc;
+    }
+    
+    .btn-send {
+        background: #0088cc;
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 18px;
+        transition: background 0.3s;
+        flex-shrink: 0;
+    }
+    
+    .btn-send:hover {
+        background: #0077bb;
+    }
+    
+    /* Панель администратора */
+    /* Расширение панели администратора */
+    .admin-panel {
+        display: none;
+        background: #f8f9fa;
+        padding: 20px;
+        border-top: 1px solid #e0e0e0;
+        min-height: 120px;  /* Увеличенная высота */
+    }
+
+    .admin-title {
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .admin-controls {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        justify-content: center;  /* Центрирование */
+        flex-wrap: wrap;  /* Перенос на новую строку если нужно */
+    }
+
+    .admin-select {
+        flex: 1;
+        min-width: 250px;  /* Минимальная ширина */
+        max-width: 400px;  /* Максимальная ширина */
+        padding: 10px 15px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+    }
+    
+    .btn-delete-user {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.3s;
+    }
+    
+    .btn-delete-user:hover {
+        background: #c82333;
+    }
+</style>
+
+<div class="messenger-wrapper">
+    <!-- Левая панель - список пользователей -->
+    <div class="users-panel">
+        <div class="users-header">
+            <div class="user-info-top">
+                <div class="current-user-avatar">👤</div>
+                <div class="current-user-name">{{ login }}</div>
+            </div>
+            <button class="btn-logout" onclick="logout()">Выйти</button>
+        </div>
+        
+        <div class="users-list" id="users-list">
+            <!-- Список пользователей загружается через JS -->
+        </div>
+        
+        <!-- Панель администратора -->
+        {% if is_admin %}
+        <div class="admin-panel" id="admin-panel">
+            <div class="admin-title">Панель администратора</div>
+            <div class="admin-controls">
+                <select class="admin-select" id="delete-user-select">
+                    <option value="">Выберите пользователя</option>
+                </select>
+                <button class="btn-delete-user" onclick="deleteUser()">Удалить</button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="chat-panel">
+        <div class="chat-header">
+            <div class="chat-title" id="chat-title">Выберите собеседника</div>
+        </div>
+        
+        <div class="chat-container" id="chat-container" style="display: none;">
+            <div class="messages-container" id="messages-container">
+            </div>
+        </div>
+        
+        <div class="no-chat-selected" id="no-chat-selected">
+            <div class="no-chat-icon">💬</div>
+            <h2>Добро пожаловать в MAX Messenger!</h2>
+            <p>Выберите собеседника из списка слева, чтобы начать общение</p>
+        </div>
+        
+        <div class="message-input-container">
+            <div class="message-input-wrapper">
+                <textarea 
+                    class="message-input" 
+                    id="message-input" 
+                    placeholder="Введите сообщение..."
+                    rows="1"
+                ></textarea>
+                <button class="btn-send" onclick="sendMessage()" title="Отправить">↑</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

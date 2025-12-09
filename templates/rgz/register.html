@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block lab %}РГЗ - Регистрация{% endblock %}
+
+{% block script %}
+<script>
+    async function register() {
+        const login = document.getElementById('login').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const confirmPassword = document.getElementById('confirmPassword').value.trim();
+        
+        if (!login || !password || !confirmPassword) {
+            alert('Заполните все поля');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            alert('Пароли не совпадают');
+            return;
+        }
+        
+        if (login.length < 3) {
+            alert('Логин должен быть не менее 3 символов');
+            return;
+        }
+        
+        const response = await fetch("{{ url_for('rgz.api') }}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'register',
+                params: { login, password },
+                id: Math.round(Math.random() * 1000)
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            alert('Ошибка: ' + data.error.message);
+        } else {
+            alert('Регистрация успешна! Теперь войдите в систему.');
+            window.location.href = "{{ url_for('rgz.login_page') }}";
+        }
+    }
+    
+    // Enter для регистрации
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('confirmPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                register();
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block main %}
+<style>
+    .register-container {
+        max-width: 400px;
+        margin: 40px auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        padding: 40px;
+    }
+    
+    .register-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .register-logo {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+    
+    .register-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #0088cc;
+    }
+    
+    .btn-submit {
+        width: 100%;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.3s;
+        margin-top: 10px;
+    }
+    
+    .btn-submit:hover {
+        background: #45a049;
+    }
+    
+    .register-footer {
+        text-align: center;
+        margin-top: 20px;
+        color: #666;
+    }
+    
+    .link {
+        color: #0088cc;
+        text-decoration: none;
+    }
+    
+    .link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="register-container">
+    <div class="register-header">
+        <div class="register-logo"></div>
+        <h1 class="register-title">Регистрация в MAX Messenger</h1>
+        <p>Создайте акаунтик</p>
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label" for="login">Логин</label>
+        <input type="text" id="login" class="form-input" placeholder="Придумайте логин (мин. 3 символа)">
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label" for="password">Пароль</label>
+        <input type="password" id="password" class="form-input" placeholder="Придумайте пароль">
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label" for="confirmPassword">Подтвердите пароль</label>
+        <input type="password" id="confirmPassword" class="form-input" placeholder="Повторите пароль">
+    </div>
+    
+    <button class="btn-submit" onclick="register()">Зарегистрироваться</button>
+    
+    <div class="register-footer">
+        <p>Уже есть аккаунт? <a class="link" href="{{ url_for('rgz.login_page') }}">Войти</a></p>
+        <p><a class="link" href="{{ url_for('rgz.main') }}">← Назад на главную</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block lab %}РГЗ - Вход в мессенджер{% endblock %}
+
+{% block script %}
+<script>
+    async function login() {
+        const login = document.getElementById('login').value.trim();
+        const password = document.getElementById('password').value.trim();
+        
+        if (!login || !password) {
+            alert('Заполните все поля');
+            return;
+        }
+        
+        const response = await fetch("{{ url_for('rgz.api') }}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'login',
+                params: { login, password },
+                id: Math.round(Math.random() * 1000)
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            alert('Ошибка: ' + data.error.message);
+        } else {
+            alert('Успешный вход!');
+            window.location.href = "{{ url_for('rgz.main') }}";
+        }
+    }
+    
+    // Enter для входа
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block main %}
+<style>
+    .login-container {
+        max-width: 400px;
+        margin: 40px auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        padding: 40px;
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .login-logo {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+    
+    .login-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #0a007c;
+        margin-bottom: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #383838;
+        font-size: 14px;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 14px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #0088cc;
+    }
+    
+    .btn-submit {
+        width: 100%;
+        background: #0088cc;
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.3s;
+        margin-top: 10px;
+    }
+    
+    .btn-submit:hover {
+        background: #0077bb;
+    }
+    
+    .login-footer {
+        text-align: center;
+        margin-top: 20px;
+        color: #666;
+    }
+    
+    .link {
+        color: #0088cc;
+        text-decoration: none;
+    }
+    
+    .link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-header">
+        <h1 class="login-title">Вход в MAX Messenger</h1>
+        <p>Введите данные для входа, обещаем они никуда не утекут</p>
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label" for="login">Логин</label>
+        <input type="text" id="login" class="form-input" placeholder="Ваш логин">
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label" for="password">Пароль</label>
+        <input type="password" id="password" class="form-input" placeholder="Ваш пароль">
+    </div>
+    
+    <button class="btn-submit" onclick="login()">Войти</button>
+    
+    <div class="login-footer">
+        <p>Нет аккаунта? <a class="link" href="{{ url_for('rgz.register_page') }}">Зарегистрироваться</a></p>
+        <p><a class="link" href="{{ url_for('rgz.main') }}">← Назад на главную</a></p>
+    </div>
+</div>
+{% endblock %}
