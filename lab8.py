@@ -11,6 +11,7 @@ lab8 = Blueprint('lab8', __name__)
 def lab():
     return render_template('lab8/lab8.html', login=session.get('login'))
 
+
 @lab8.route('/lab8/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
@@ -83,9 +84,8 @@ def logout():
 @lab8.route('/lab8/articles/')
 @login_required
 def article_list():
-    # получаем статьи текущего пользователя
     user_articles = articles.query.filter_by(login_id=current_user.id).all()
-    return render_template('lab8/articles.html', articles=user_articles)
+    return render_template('lab8/articles.html', articles=user_articles, login=current_user.login)
 
 
 @lab8.route('/lab8/create', methods=['GET', 'POST'])
@@ -94,13 +94,11 @@ def create_article():
     if request.method == 'GET':
         return render_template('lab8/create.html')
     
-    # получаем данные из формы
     title = request.form.get('title')
     article_text = request.form.get('article_text')
     is_public = request.form.get('is_public') == 'on'
     is_favorite = request.form.get('is_favorite') == 'on'
     
-    # проверка обязательных полей
     if not title:
         return render_template('lab8/create.html',
                                error='Заголовок не может быть пустым')
@@ -109,42 +107,35 @@ def create_article():
         return render_template('lab8/create.html',
                                error='Текст статьи не может быть пустым')
     
-    # проверка длины заголовка (максимум 50 символов)
     if len(title) > 50:
         return render_template('lab8/create.html',
                                error='Заголовок должен быть не длиннее 50 символов')
     
-    # создаем новую статью
     new_article = articles(
         login_id=current_user.id,
         title=title,
         article_text=article_text,
         is_public=is_public,
         is_favorite=is_favorite,
-        likes=0  # по умолчанию 0 лайков
+        likes=0
     )
     
-    # сохраняем в БД
     db.session.add(new_article)
     db.session.commit()
     
-    # перенаправляем на список статей
-    return redirect('/lab8/articles')
+    return redirect('/lab8/articles/')
 
 
 @lab8.route('/lab8/edit/<int:article_id>', methods=['GET', 'POST'])
 @login_required
 def edit_article(article_id):
-    # находим статью
     article = articles.query.get(article_id)
     
-    # проверяем, что статья существует
     if not article:
-        return redirect('/lab8/articles')
+        return redirect('/lab8/articles/')
     
-    # проверяем, что статья принадлежит текущему пользователю
     if article.login_id != current_user.id:
-        return redirect('/lab8/articles')
+        return redirect('/lab8/articles/')
     
     if request.method == 'GET':
         return render_template('lab8/edit.html', article=article)
@@ -154,7 +145,6 @@ def edit_article(article_id):
     is_public = request.form.get('is_public') == 'on'
     is_favorite = request.form.get('is_favorite') == 'on'
     
-    # проверка обязательных полей
     if not title:
         return render_template('lab8/edit.html',
                                article=article,
@@ -170,7 +160,6 @@ def edit_article(article_id):
                                article=article,
                                error='Заголовок должен быть не длиннее 50 символов')
     
-    # обновляем статью
     article.title = title
     article.article_text = article_text
     article.is_public = is_public
@@ -178,25 +167,59 @@ def edit_article(article_id):
     
     db.session.commit()
     
-    return redirect('/lab8/articles')
+    return redirect('/lab8/articles/')
 
 
-@lab8.route('/lab8/delete/<int:article_id>')
+@lab8.route('/lab8/delete/<int:article_id>', methods=['POST'])
 @login_required
 def delete_article(article_id):
-    # находим статью
     article = articles.query.get(article_id)
     
-    # проверяем, что статья существует
     if not article:
-        return redirect('/lab8/articles')
+        return redirect('/lab8/articles/')
     
-    # проверяем, что статья принадлежит текущему пользователю
     if article.login_id != current_user.id:
-        return redirect('/lab8/articles')
+        return redirect('/lab8/articles/')
     
-    # удаляем статью
     db.session.delete(article)
     db.session.commit()
     
-    return redirect('/lab8/articles')
+    return redirect('/lab8/articles/')
+
+
+@lab8.route('/lab8/public_articles', methods=['GET'])
+def public_articles():
+    articles_list = articles.query.filter_by(is_public=True).all()
+    if current_user.is_authenticated:
+        return render_template('lab8/public_articles.html', login=current_user.login, articles=articles_list)
+    return render_template('lab8/public_articles.html', articles=articles_list)
+
+
+@lab8.route('/lab8/user_search', methods=['GET'])
+@login_required
+def search_user_articles():
+    query = request.args.get('q')
+    user_articles = articles.query.filter(
+        (articles.title.ilike(f'%{query}%') | articles.article_text.ilike(f'%{query}%')),
+        articles.login_id == current_user.id
+    ).all()
+    return render_template('lab8/search_user_articles.html', user_articles=user_articles, query=query, login=current_user.login)
+
+
+@lab8.route('/lab8/public_search', methods=['GET'])
+def search_public_articles():
+    query = request.args.get('q')
+    public_articles = articles.query.filter(
+        (articles.title.ilike(f'%{query}%') | articles.article_text.ilike(f'%{query}%')),
+        articles.is_public == True
+    ).all()
+    if current_user.is_authenticated:
+        return render_template('lab8/search_public_articles.html', public_articles=public_articles, query=query, login=current_user.login)
+    return render_template('lab8/search_public_articles.html', public_articles=public_articles, query=query)
+
+
+@lab8.route('/lab8/favorites')
+@login_required
+def favorites():
+    favorite_articles = articles.query.filter_by(login_id=current_user.id, is_favorite=True).all()
+    return render_template('lab8/favorites.html', articles=favorite_articles, login=current_user.login)
