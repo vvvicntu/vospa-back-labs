@@ -30,6 +30,7 @@ def register():
         return render_template('lab8/register.html',
                                error='Пароль не может быть пустым')
     
+    # проверка существования
     login_exists = users.query.filter_by(login=login_form).first()
     if login_exists:
         return render_template('lab8/register.html',
@@ -198,11 +199,14 @@ def public_articles():
 @lab8.route('/lab8/user_search', methods=['GET'])
 @login_required
 def search_user_articles():
+    # получение поискового запроса из URL-параметров
     query = request.args.get('q')
     user_articles = articles.query.filter(
+        # поиск по заголовку или тексту
         (articles.title.ilike(f'%{query}%') | articles.article_text.ilike(f'%{query}%')),
+        # статьи принадлежат текущему пользователю
         articles.login_id == current_user.id
-    ).all()
+    ).all() # получаем найденные записи
     return render_template('lab8/search_user_articles.html', user_articles=user_articles, query=query, login=current_user.login)
 
 
