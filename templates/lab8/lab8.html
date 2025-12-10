@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
-{% block lab %}Лабораторная работа 5{% endblock %}
+{% block lab %}Лабораторная работа 8{% endblock %}
 
 {% block main %}
     <h1>База знаний</h1>
     
     <div class="menu">
-        <a href="/lab8/login">Список статей</a>
-        <a href="/lab8/articles">Статьи</a>
+        <a href="/lab8/articles">Список статей</a>
         
-        {% if session.get('login') %}
+        {% if current_user.is_authenticated %}
+            <a href="/lab8/create">Создать статью</a>
             <a href="/lab8/logout">Выйти</a>
-            <span class="username">{{ session['login'] }}</span>
+            <span class="username">{{ current_user.login }}</span>
         {% else %}
             <a href="/lab8/login">Войти</a>
             <a href="/lab8/register">Регистрация</a>
@@ -50,4 +50,5 @@
             color: #000d6d;
         }
     </style>
+    
 {% endblock %}
