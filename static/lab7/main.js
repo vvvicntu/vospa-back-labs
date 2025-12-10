@@ -112,7 +112,7 @@ function sendFilm() {
     })
         .then(resp => {
             if (resp.ok) {
-                fillFilmList();
+                fillFilmList(); // обновляет таблицу 
                 hideModal();
                 return {};
             }
