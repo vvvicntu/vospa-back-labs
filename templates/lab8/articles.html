@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 8{% endblock %}
+
+{% block main %}
+    <h1>Мои статьи</h1>
+
+    <div class="create-button">
+        <a href="/lab8/create" class="create-link">+ Создать новую статью</a>
+    </div>
+
+    {% if articles %}
+        <div class="articles-container">
+            {% for article in articles %}
+                <div class="article-card">
+                    <h3 class="article-title">{{ article.title }}</h3>
+                    <p class="article-text">{{ article.article_text }}</p>
+                    
+                    <div class="article-meta">
+                        {% if article.is_public %}
+                            <span class="public-badge">Public</span>
+                        {% else %}
+                            <span class="private-badge">My</span>
+                        {% endif %}
+                        
+                        {% if article.is_favorite %}
+                            <span class="favorite-badge">★ Избранная</span>
+                        {% endif %}
+                        
+                        <span class="likes-count">Лайков: {{ article.likes or 0 }}</span>
+                    </div>
+                    
+                    <div class="article-actions">
+                        <a href="/lab8/edit/{{ article.id }}" class="edit-btn">
+                            Редактировать
+                        </a>
+                        <a href="/lab8/delete/{{ article.id }}" class="delete-btn"
+                           onclick="return confirm('Вы уверены, что хотите удалить эту статью?')">
+                            Удалить
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-articles">У вас пока нет статей. <a href="/lab8/create" class="create-link-text">Создайте первую!</a></p>
+    {% endif %}
+
+    <style>
+        .create-button {
+            margin-bottom: 20px;
+        }
+        
+        .create-link {
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #b1ffb4;
+            color: rgb(110, 110, 110);
+            border-radius: 4px;
+            display: inline-block;
+            border: 1px solid #8cd98c;
+        }
+        
+        .create-link:hover {
+            background-color: #9de9a0;
+        }
+        
+        .articles-container {
+            margin-top: 20px;
+        }
+        
+        .article-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .article-title {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .article-text {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .article-meta {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .public-badge {
+            color: green;
+            font-weight: bold;
+        }
+        
+        .private-badge {
+            color: gray;
+            font-weight: bold;
+        }
+        
+        .favorite-badge {
+            color: #ff9900;
+            margin-left: 15px;
+        }
+        
+        .likes-count {
+            margin-left: 15px;
+        }
+        
+        .article-actions {
+            margin-top: 10px;
+        }
+        
+        .edit-btn {
+            text-decoration: none;
+            padding: 5px 10px;
+            background-color: #2196F3;
+            color: white;
+            border-radius: 3px;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+        
+        .edit-btn:hover {
+            background-color: #0b7dda;
+        }
+        
+        .delete-btn {
+            text-decoration: none;
+            padding: 5px 10px;
+            background-color: #f44336;
+            color: white;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        
+        .delete-btn:hover {
+            background-color: #da190b;
+        }
+        
+        .no-articles {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 30px;
+        }
+        
+        .create-link-text {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .create-link-text:hover {
+            text-decoration: underline;
+        }
+    </style>
+{% endblock %}
